@@ -42,7 +42,9 @@ boolean _type(){
 	{
 		result=true;
 	}else{
+		
 		result=false;
+
 	}
 	return result;
 }
@@ -624,6 +626,21 @@ if (debug) printf ("%s \n ","_literal");
 
 	return result;
 }
+
+
+expression =
+	non_assignment_expression
+	 | assignment.
+non_assignment_expression =
+	conditional_expression
+	 | lambda_expression
+	 | query_expression.
+constant_expression =
+	expression.
+boolean_expression =
+	expression.
+
+
 /***********************************************************************/
 /*
 literal =
@@ -723,6 +740,133 @@ null_literal =
 
 /********************************************************************************/
 
+ 
+/*statement =
+	labeled_statement
+	 | declaration_statement
+	 | embedded_statement.*/
+
+boolean _statement(){
+	boolean result;
+
+	
+		if (_declaration_statement())
+		{
+			result=true;
+		}else{
+			if (_embedded_statement())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+
+		}
+
+
+	return result;
+}
+
+/*embedded_statement =
+	block							*
+	 | empty_statement				*
+	 | expression_statement			*
+	 | selection_statement			* 
+	 | iteration_statement			*
+	 | jump_statement				*
+	 | try_statement
+	 | checked_statement
+	 | unchecked_statement
+	 | lock_statement
+	 | using_statement
+	 | yield_statement
+	 | embedded_statement_unsafe.*/
+
+
+boolean _embedded_statement(){
+	boolean result;
+
+
+	return result;
+}
+
+/*block =
+	'{' [statement_list] '}'.*/
+
+boolean 
+
+/*statement_list =
+	statement
+	 | statement_list statement.*/
+
+/*empty_statement = ';'.*/
+
+
+
+/*labeled_statement = identifier ':' statement.*/
+
+/*expression_statement =
+	statement_expression ';'.*/
+
+
+/*statement_expression =
+	invocation_expression
+	 | object_creation_expression
+	 | assignment
+	 | post_increment_expression
+	 | post_decrement_expression
+	 | pre_increment_expression
+	 | pre_decrement_expression.*/
+
+
+
+
+
+
+
+
+
+
+
+/* zakaria                               */
+
+/*selection_statement =
+	if_statement
+	 | switch_statement.*/
+
+/*if_statement =
+	'if' '(' boolean_expression ')' embedded_statement
+	 | 'if' '(' boolean_expression ')' embedded_statement 'else' embedded_statement.*/
+
+/*switch_statement =
+	'switch' '(' expression ')' switch_block.*/
+
+/*switch_block =
+	'{' [switch_sections] '}'.*/
+
+/*switch_sections =
+	switch_section
+	 | switch_sections switch_section.*/
+
+/*switch_section =
+	switch_labels statement_list.*/
+
+/******* switch_labels =
+	   		switch_label
+	 		| switch_labels switch_label.*/
+
+
+/*switch_labels =
+	   		switch_label switch_labels_aux
+	 		*/
+
+/*switch_labels_aux = switch_label switch_labels_aux | eps */
+
+/*switch_label =
+	'case' constant_expression ':'
+	 | 'default' ':'.*/
+	 
 
 
 int main(){
