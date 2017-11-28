@@ -1,21 +1,27 @@
 %{
 #include <stdio.h>
 #include "analyseur_csharp.h"
+	boolean debug=true;
 %}
 %option noyywrap
 %option yylineno
 %option stack
 
 DIGIT 	[0-9]
-IDFF	[A-Za-z_][A-Za-z0-9_]*
+IDFF	[A-Za-z_@][A-Za-z0-9_]*
+letter    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_".
+cr        = '\u000d'. /*13 = CR*/
+eol       = '\u000a'. /*10 = LF*/
+tab       = '\u0009'. /*9*/
 
 %%
 " "									{}
 [\n]*								{}
 [\t]*								{}
 ";"							{return PVIRG;}
-{DIGIT}+"."{DIGIT}*			{if (debug) printf ("%s ",yytext);	return DNUMBER;}
-{DIGIT}+					{if (debug) printf ("%s ",yytext);	return INUMBER;}
+","							{return VIRG;}
+{DIGIT}+"."{DIGIT}*			{if (debug) printf ("%s ",yytext);	return DOUBLENUMBER;}
+{DIGIT}+					{if (debug) printf ("%s ",yytext);	return INTNUMBER;}
 "abstract"					{if (debug) printf ("%s ",yytext);	return ABSTRACT;}
 "as"						{if (debug) printf ("%s ",yytext);	return AS;}
 "base"						{if (debug) printf ("%s ",yytext);	return BASE;}
@@ -57,7 +63,7 @@ IDFF	[A-Za-z_][A-Za-z0-9_]*
 "long"						{if (debug) printf ("%s ",yytext);	return LONG;}
 "namespace"					{if (debug) printf ("%s ",yytext);	return NAMESPACE;}
 "new"						{if (debug) printf ("%s ",yytext);	return NEW;} 		
-"null"						{if (debug) printf ("%s ",yytext);	return NULL;}
+"null"						{if (debug) printf ("%s ",yytext);	return NNULL;}
 "object"					{if (debug) printf ("%s ",yytext);	return OBJECT;}
 "operator"					{if (debug) printf ("%s ",yytext);	return OPERATOR;}
 "out"						{if (debug) printf ("%s ",yytext);	return OUT;}
@@ -124,7 +130,7 @@ IDFF	[A-Za-z_][A-Za-z0-9_]*
 "-"							{if (debug) printf ("-"); return MINUS;}
 "*"							{if (debug) printf ("*"); return MULT;}
 "/"							{if (debug) printf ("/"); return DIV;}		
-
+"var"						{if (debug) printf ("/"); return VAR;}		
 {IDFF}						{if (debug) printf ("identifier");	return IDF;}
 .							{ printf( "ERRORLEX(%s) ", yytext );}
 
