@@ -852,12 +852,61 @@ boolean _expression(){
 	 | foreach_statement.*/
 
 boolean _iteration_statement(){
-	
+	boolean result;
+	if (_while_statement())
+	{
+		result=true;
+	}else{
+		if (_do_statement())
+		{
+			result=true;
+		}else{
+			if(_for_statement()){
+				result=true;
+			}
+			else{
+				result=false;
+			}
+		}
+	}
+	return result;
 }
 
 /*while_statement =
 	'while' '(' boolean_expression ')' embedded_statement.*/
 
+boolean _while_statement(){
+	boolean result;
+
+	if(token==WHILE){
+		token=_lire_token();
+		if(token==POPEN){
+			token=_lire_token();
+			if(_boolean_expression()){
+				token=_lire_token();
+				if(token==PCLOSE){
+					token=_lire_token();
+					if(_embedded_statement()){
+						result=true;
+					}else{
+						result=false;
+					}
+				}else{
+					result=false;
+				}
+			}else{
+				result=false;
+			}
+
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+
+	return result;
+}
 /*do_statement =
 	'do' embedded_statement 'while' '(' boolean_expression ')' ';'.*/
 
