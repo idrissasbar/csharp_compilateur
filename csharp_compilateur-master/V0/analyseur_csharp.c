@@ -900,33 +900,25 @@ boolean _for_statement(){
 		
 		if(token == POPEN){
 
-			token = _lire_token();
-
-			if(token == _for_initializer()){
+			if(_for_initializer()){
 
 				token = _lire_token();
 
 				if(token == PVIRG){
 
-					token = _lire_token();
-
-					if(token == _for_condition()){
+					if(_for_condition()){
 
 						token = _lire_token();
 
 						if(token == PVIRG){
 
-							token = _lire_token();
-
-							if(token == _for_iterator()){
+							if(_for_iterator()){
 
 								token = _lire_token();
 
 								if(token == PCLOSE){
 
-									token = _lire_token();
-
-									if(token == _embedded_statement()){
+									if(_embedded_statement()){
 
 										result = true;
 									}
