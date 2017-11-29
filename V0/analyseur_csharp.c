@@ -629,117 +629,85 @@ if (debug) printf ("%s \n ","_literal");
 
 /*  driss asbar ______________________________________________*/
 
-/*expression =
-	non_assignment_expression
-	 | assignment.
+
+
+/*
 non_assignment_expression =
 	conditional_expression
 	 | lambda_expression
-	 | query_expression.
-constant_expression =
-	expression.
-boolean_expression =
+	 | query_expression.*/
+
+boolean _non_assignment_expression(){
+	boolean result;
+
+	return result;
+}
+
+
+/***************conditional_expression =
+					null_coalescing_expression
+	 				| null_coalescing_expression '?' expression ':' expression.*/
+
+
+/*conditional_expression = null_coalescing_expression conditional_expression_aux*/
+
+
+/*conditional_expression_aux='?' expression ':' expression | eps */
+
+
+/***************	null_coalescing_expression =
+						conditional_or_expression
+	 					| conditional_or_expression '??' null_coalescing_expression.*/
+
+/*null_coalescing_expression  = conditional_or_expression null_coalescing_expression_aux*/
+
+
+
+
+/*null_coalescing_expression_aux= '??' null_coalescing_expression | eps.*/
+
+/****************conditional_or_expression =
+					conditional_and_expression
+	 				| conditional_or_expression '||' conditional_and_expression.*/
+
+
+/*conditional_or_expression = conditional_and_expression conditional_or_expression_aux.*/
+
+/*conditional_or_expression_aux = '||' conditional_and_expression conditional_or_expression_aux | aps .*/
+
+/*constant_expression =
+	expression.*/
+
+boolean constant_expression(){
+	boolean result;
+
+	if (_expression())
+	{
+		result=true;
+	}else{
+
+		result=false;
+	}
+
+	return result;
+}
+
+/*boolean_expression =
 	expression.
 */
 
-/***********************************************************************/
-/*
-literal =
-	boolean_literal
-	 | integer_literal
-	 | real_literal
-	 | character_literal
-	 | string_literal
-	 | null_literal.
-boolean_literal =
-	'true'
-	 | 'false'.
-integer_literal =
-	decimal_integer_literal
-	 | hexadecimal_integer_literal.
-decimal_integer_literal =
-	decimal_digits [integer_type_suffix].
-decimal_digits =
-	decimal_digit
-	 | decimal_digits decimal_digit.
-decimal_digit =
-	'0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'.
-integer_type_suffix =
-	'U' | 'u' | 'L' | 'l' | 'UL' | 'Ul' | 'uL' | 'ul' | 'LU' | 'Lu' | 'lU' | 'lu'.
-hexadecimal_integer_literal =
-	'0x' hex_digits [integer_type_suffix]
-	 | '0X' hex_digits [integer_type_suffix].
-hex_digits =
-	hex_digit
-	 | hex_digits hex_digit.
-hex_digit =
-	'0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-	 | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f'.
-real_literal =
-	decimal_digits '.' decimal_digits [exponent_part] [real_type_suffix]
-	 | '.' decimal_digits [exponent_part] [real_type_suffix]
-	 | decimal_digits exponent_part [real_type_suffix]
-	 | decimal_digits real_type_suffix.
-exponent_part =
-	'e' [sign] decimal_digits
-	 | 'E' [sign] decimal_digits.
-sign =
-	'+' | '-'.
-real_type_suffix =
-	'F' | 'f' | 'D' | 'd' | 'M' | 'm'.
-character_literal =
-	"'" character "'".
-character =
-	single_character
-	 | simple_escape_sequence
-	 | hexadecimal_escape_sequence
-	 | unicode_escape_sequence.
-single_character = .
+boolean _boolean_expression(){
+	boolean result;
 
-simple_escape_sequence =
-	"\'" | '\"' | '\\' | '\0' | '\a' | '\b' | '\f' | '\n' | '\r' | '\t' | '\v'.
+	if (_expression())
+	{
+		result=true;
+	}else{
 
-hexadecimal_escape_sequence =
-	'\x' hex_digit [hex_digit] [hex_digit] [hex_digit].
-
-
-string_literal =
-	regular_string_literal
-	 | verbatim_string_literal.
-
-regular_string_literal =
-	'"' [regular_string_literal_characters] '"'.
-
-regular_string_literal_characters =
-	regular_string_literal_character
-	 | regular_string_literal_characters regular_string_literal_character.
-
-regular_string_literal_character =
-	single_regular_string_literal_character
-	 | simple_escape_sequence
-	 | hexadecimal_escape_sequence
-	 | unicode_escape_sequence.
-
-single_regular_string_literal_character = .
-verbatim_string_literal =
-	'@"' [verbatim_string_literal_characters] '"'.
-
-verbatim_string_literal_characters =
-	verbatim_string_literal_character
-	 | verbatim_string_literal_characters verbatim_string_literal_character.
-
-verbatim_string_literal_character =
-	single_verbatim_string_literal_character
-	 | quote_escape_sequence.
-
-single_verbatim_string_literal_character = .
-quote_escape_sequence =
-	'""'.
-
-null_literal =
-	'null'.
-
-/********************************************************************************/
+		result=false;
+	}
+	return result;
+}
 
  
 /*statement =
@@ -795,7 +763,10 @@ boolean _embedded_statement(){
 /*block =
 	'{' [statement_list] '}'.*/
 
-boolean 
+boolean _block(){
+
+
+}
 
 /*statement_list =
 	statement
@@ -809,7 +780,10 @@ boolean
 
 /*expression_statement =
 	statement_expression ';'.*/
+boolean _expression(){
 
+	
+}
 
 /*statement_expression =
 	invocation_expression
