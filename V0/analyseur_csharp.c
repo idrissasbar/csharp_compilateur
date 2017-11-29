@@ -910,6 +910,47 @@ boolean _while_statement(){
 /*do_statement =
 	'do' embedded_statement 'while' '(' boolean_expression ')' ';'.*/
 
+boolean _do_statement(){
+	boolean result;
+	if(token==DO){
+		token=_lire_token();
+		if(_embedded_statement()){
+			token=_lire_token();
+			if(token==WHILE){
+				token=_lire_token();
+				if(token=POPEN){
+					token=_lire_token();
+					if(_boolean_expression()){
+						token=_lire_token();
+						if(token=PCLOSE){
+							token=_lire_token();
+							if(token=PVIRG){
+								result=true;
+							}else{
+								result=false;
+							}
+						}else{
+							result=false;
+						}
+					}else{
+						result=false;
+					}
+				}else{
+					result=false;
+				}
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+
+	return result;
+}
+
 /* abad mohamed zayd  ________________________________________________________________*/
 
 /*for_statement =
