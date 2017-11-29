@@ -385,6 +385,7 @@ argument_value =
 primary_expression =
 	primary_no_array_creation_expression
 	 | array_creation_expression.
+	 
 primary_no_array_creation_expression =
 	literal
 	 | simple_name
@@ -643,6 +644,8 @@ assignment_operator =
 	 | '^='
 	 | '<<='
 	 | right_shift_assignment.
+
+
 expression =
 	non_assignment_expression
 	 | assignment.
@@ -674,18 +677,24 @@ embedded_statement =
 	 | using_statement
 	 | yield_statement
 	 | embedded_statement_unsafe.
+
 block =
 	'{' [statement_list] '}'.
+
 statement_list =
 	statement
 	 | statement_list statement.
-empty_statement =
-	';'.
-labeled_statement =
-	identifier ':' statement.
+
+empty_statement = ';'.
+
+labeled_statement = identifier ':' statement.
+
+
+
 declaration_statement =
 	local_variable_declaration ';'
 	 | local_constant_declaration ';'.
+
 local_variable_declaration =
 	local_variable_type local_variable_declarators.
 local_variable_type =
@@ -694,13 +703,17 @@ local_variable_type =
 local_variable_declarators =
 	local_variable_declarator
 	 | local_variable_declarators ',' local_variable_declarator.
+
 local_variable_declarator =
 	identifier
 	 | identifier '=' local_variable_initializer.
+
 local_variable_initializer =
 	expression
 	 | array_initializer
 	 | local_variable_initializer_unsafe.
+
+
 local_constant_declaration =
 	'const' type constant_declarators.
 expression_statement =
@@ -713,36 +726,49 @@ statement_expression =
 	 | post_decrement_expression
 	 | pre_increment_expression
 	 | pre_decrement_expression.
+
+
 selection_statement =
 	if_statement
 	 | switch_statement.
+
 if_statement =
 	'if' '(' boolean_expression ')' embedded_statement
 	 | 'if' '(' boolean_expression ')' embedded_statement 'else' embedded_statement.
+
 switch_statement =
 	'switch' '(' expression ')' switch_block.
+
 switch_block =
 	'{' [switch_sections] '}'.
+
 switch_sections =
 	switch_section
 	 | switch_sections switch_section.
+
 switch_section =
 	switch_labels statement_list.
+
 switch_labels =
 	switch_label
 	 | switch_labels switch_label.
+
 switch_label =
 	'case' constant_expression ':'
 	 | 'default' ':'.
+
 iteration_statement =
 	while_statement
 	 | do_statement
 	 | for_statement
 	 | foreach_statement.
+
 while_statement =
 	'while' '(' boolean_expression ')' embedded_statement.
+
 do_statement =
 	'do' embedded_statement 'while' '(' boolean_expression ')' ';'.
+	
 for_statement =
 	'for' '(' [for_initializer] ';' [for_condition] ';' [for_iterator] ')' embedded_statement.
 for_initializer =

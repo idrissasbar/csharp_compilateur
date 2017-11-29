@@ -627,8 +627,9 @@ if (debug) printf ("%s \n ","_literal");
 	return result;
 }
 
+/*  driss asbar ______________________________________________*/
 
-expression =
+/*expression =
 	non_assignment_expression
 	 | assignment.
 non_assignment_expression =
@@ -639,7 +640,7 @@ constant_expression =
 	expression.
 boolean_expression =
 	expression.
-
+*/
 
 /***********************************************************************/
 /*
@@ -867,6 +868,39 @@ boolean
 	'case' constant_expression ':'
 	 | 'default' ':'.*/
 	 
+
+/*   idriss ait hafid ________________________________________________________________*/
+
+/*iteration_statement =
+	while_statement
+	 | do_statement
+	 | for_statement
+	 | foreach_statement.*/
+
+/*while_statement =
+	'while' '(' boolean_expression ')' embedded_statement.*/
+
+/*do_statement =
+	'do' embedded_statement 'while' '(' boolean_expression ')' ';'.*/
+
+/* abad mohamed zayd  ________________________________________________________________*/
+
+/*for_statement =
+	'for' '(' [for_initializer] ';' [for_condition] ';' [for_iterator] ')' embedded_statement.*/
+
+/*for_initializer =
+	local_variable_declaration
+	 | statement_expression_list.*/
+
+/*for_condition =
+	boolean_expression.*/
+
+/*for_iterator =
+	statement_expression_list.*/
+
+/*statement_expression_list =
+	statement_expression
+	 | statement_expression_list ',' statement_expression.*/
 
 
 int main(){
