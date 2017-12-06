@@ -1998,24 +1998,7 @@ boolean _do_statement(){
 	return result;
 }
 
-/* abad mohamed zayd  ________________________________________________________________*/
 
-/*for_statement =
-	'for' '(' [for_initializer] ';' [for_condition] ';' [for_iterator] ')' embedded_statement.*/
-
-/*for_initializer =
-	local_variable_declaration
-	 | statement_expression_list.*/
-
-/*for_condition =
-	boolean_expression.*/
-
-/*for_iterator =
-	statement_expression_list.*/
-
-/*statement_expression_list =
-	statement_expression
-	 | statement_expression_list ',' statement_expression.*/
 /* abad mohamed zayd  ________________________________________________________________*/
 
 /*for_statement =
