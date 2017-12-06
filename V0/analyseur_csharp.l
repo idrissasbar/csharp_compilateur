@@ -19,6 +19,9 @@ tab       = '\u0009'. /*9*/
 [\n]*								{}
 [\t]*								{}
 ";"							{return PVIRG;}
+"??"						{return NULLCOALESCING;}
+"?"							{return POINTINTER;}
+":"							{return DOUBLEDOT;}
 ","							{return VIRG;}
 {DIGIT}+"."{DIGIT}*			{if (debug) printf ("%s ",yytext);	return DOUBLENUMBER;}
 {DIGIT}+					{if (debug) printf ("%s ",yytext);	return INTNUMBER;}
@@ -105,14 +108,25 @@ tab       = '\u0009'. /*9*/
 ")"							{if (debug) printf (")"); return PCLOSE;}		
 "{"							{if (debug) printf ("{"); return BOPEN;}
 "}"							{if (debug) printf ("}"); return BCLOSE;}
+"="							{if (debug) printf ("="); return EQ;}
+"+"							{if (debug) printf ("+"); return PLUS;}
+"-"							{if (debug) printf ("-"); return MINUS;}
+"*"							{if (debug) printf ("*"); return MULT;}
+"/"							{if (debug) printf ("/"); return DIV;}
+"%"							{if (debug) printf ("/"); return MOD;}
 "+="  						{if (debug) printf ("+="); return PLUSEQ; }
 "-="  						{if (debug) printf ("-="); return MINUSEQ; }
 "*="  						{ return STAREQ; }
 "/="  						{ return DIVEQ; }
 "%="  						{ return MODEQ; }
+"^"  						{ return XOR; }
 "^="  						{ return XOREQ; }
+"&"  						{ return AND; }
 "&="  						{ return ANDEQ; }
+"|"  						{ return OR; }
 "|="  						{ return OREQ; }
+"<"  						{ return LT; }
+">"  						{ return GT; }
 "<<"  						{ return LTLT; }
 ">>"  						{ return GTGT; }
 ">>=" 						{ return GTGTEQ; }
@@ -124,12 +138,7 @@ tab       = '\u0009'. /*9*/
 "&&"  						{ return ANDAND; }
 "||"  						{ return OROR; }
 "++"  						{ return PLUSPLUS; }
-"--"  						{ return MINUSMINUS; }
-"="							{if (debug) printf ("="); return EQ;}
-"+"							{if (debug) printf ("+"); return PLUS;}
-"-"							{if (debug) printf ("-"); return MINUS;}
-"*"							{if (debug) printf ("*"); return MULT;}
-"/"							{if (debug) printf ("/"); return DIV;}		
+"--"  						{ return MINUSMINUS; }	
 "var"						{if (debug) printf ("/"); return VAR;}		
 {IDFF}						{if (debug) printf ("identifier");	return IDF;}
 .							{ printf( "ERRORLEX(%s) ", yytext );}

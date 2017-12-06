@@ -362,40 +362,61 @@ if (debug) printf ("%s \n ","local_variable_declarators_aux");
 	return result;
 }
 
-/*local_variable_declarator =
-	identifier
-	 | identifier '=' local_variable_initializer.*/
+/******************local_variable_declarator =
+					identifier
+	 				|identifier '=' local_variable_initializer.*/
+
+
+
+/*local_variable_declarator = identifier local_variable_declarator_aux*/
 
 boolean _local_variable_declarator(){
 	boolean result;
 if (debug) printf ("%s \n ","_local_variable_declarator");
-	if (token==PVIRG || token==VIRG)
-	{
-		follow_token=true;
-		result=true;
-	}else{
-	if (token==IDF)
-	{
+	
+	if (token==IDF){
+
 		token=_lire_token();
-		if (token==EQ)
+
+		if (_local_variable_declarator_aux())
 		{
-			token=_lire_token();
-			if (_local_variable_initializer())
-			{
+			
 				result=true;
-			}else{
-				result=false;
-			}
 			
 		}else{
-			follow_token=true;
-			result=true;
+			
+			result=false;
 		}
 		
 	}else{
 		result=false;
 	}
+
+	return result;
 }
+
+
+/*local_variable_declarator_aux= '=' local_variable_initializer | eps*/
+
+boolean _local_variable_declarator_aux(){
+	boolean result;
+
+	if (token==VIRG || token==PVIRG)
+	{
+		result=true;
+	}else{
+
+		token=_lire_token();
+
+		if (_local_variable_initializer())
+		{
+			result=true;
+		}else{
+
+			result=false;
+		}
+	}
+
 	return result;
 }
 
@@ -640,9 +661,730 @@ non_assignment_expression =
 boolean _non_assignment_expression(){
 	boolean result;
 
+		if (_conditional_expression())
+		{
+			result=true;
+		}else{
+
+			result=false;
+
+		}
 	return result;
 }
 
+
+/*************multiplicative_expression =
+								unary_expression
+								 | multiplicative_expression '*' unary_expression
+								 | multiplicative_expression '/' unary_expression
+								 | multiplicative_expression '%' unary_expression.*/
+
+/*multiplicative_expression = unary_expression  multiplicative_expression_aux*/
+
+boolean 	_multiplicative_expression(){
+	boolean result;
+
+		if (_unary_expression())
+		{
+			token=_lire_token();
+			if (_multiplicative_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+	return result;
+}
+
+/*multiplicative_expression_aux =
+							'*' unary_expression multiplicative_expression_aux
+							|'/' unary_expression multiplicative_expression_aux
+							|'%' unary_expression multiplicative_expression_aux
+							|eps*/
+
+boolean _multiplicative_expression_aux(){
+	boolean result;
+
+		if (token==PVIRG)
+		{
+			result=true;
+			follow_token=true;
+		}else{
+
+			if (token==MULT)
+			{
+				token=_lire_token();
+
+				if (_multiplicative_expression())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}
+			}else{
+
+					if (token==DIV)
+						{
+							token=_lire_token();
+
+								if (_multiplicative_expression())
+								{
+									result=true;
+								}else{
+
+									result=false;
+								}
+						}else{
+								if (token==MOD)
+								{
+									token=_lire_token();
+
+									if (_multiplicative_expression())
+									{
+											result=true;
+									}else{
+
+											result=false;
+									}
+								}else{
+
+
+									result=false;
+
+								}
+				
+						}
+			}
+		}
+
+	return result;
+}
+
+/********************additive_expression =
+								multiplicative_expression
+								 | additive_expression '+' multiplicative_expression
+								 | additive_expression '-' multiplicative_expression.*/
+
+/* additive_expression = multiplicative_expression additive_expression_aux*/
+
+
+boolean 	_additive_expression(){
+	boolean result;
+
+		if (_multiplicative_expression())
+		{
+			token=_lire_token();
+
+			if (_additive_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+	return result;
+}
+
+/*additive_expression_aux =
+						 '+' multiplicative_expression additive_expression_aux
+						|'-' multiplicative_expression additive_expression_aux
+						|eps*/
+
+boolean 	 _additive_expression_aux(){
+	boolean result;
+
+		if (token==PVIRG)
+		{
+			result=true;
+		}else{
+
+			if (token==PLUS)
+			{
+				token=_lire_token();
+
+					if (_additive_expression())
+					{
+						result=true;
+					}else{
+
+						result=false;
+					}
+			}else{
+					if (token==MINUS)
+					{
+						token=_lire_token();
+
+						if (_additive_expression())
+						{
+								result=true;
+						}else{
+
+								result=false;
+						}
+					}else{
+
+
+						result=false;
+
+					}
+				}
+			}
+
+	return result;
+}
+
+/*******************shift_expression =
+									additive_expression
+									 | shift_expression '<<' additive_expression
+									 | shift_expression right_shift additive_expression.*/
+
+/*shift_expression = additive_expression shift_expression_aux */
+
+
+boolean 	_shift_expression(){
+	boolean result;
+
+		if (_additive_expression())
+		{
+			token=_lire_token();
+
+			if (_shift_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+			
+		}else{
+
+			result=false;
+		}
+
+	return result;
+}
+
+/*shift_expression_aux = 
+					'<<' additive_expression shift_expression_aux
+					'>>' additive_expression shift_expression_aux
+					|eps*/
+
+boolean _shift_expression_aux(){
+	boolean result;
+
+		if (token==PVIRG)
+		{
+			result=true;
+			
+		}else{
+			if (token==LTLT)
+			{
+				token=_lire_token();
+
+					if (_shift_expression())
+					{
+						result=true;
+					}else{
+
+						result=false;
+					}
+			}else{
+					if (token==GTGT)
+					{
+						token=_lire_token();
+
+						if (_shift_expression())
+						{
+								result=true;
+						}else{
+
+								result=false;
+						}
+					}else{
+
+
+						result=false;
+
+					}
+				}
+		}
+
+	return result;
+}
+
+/******************************************relational_expression =
+														shift_expression
+														 | relational_expression '<' shift_expression
+														 | relational_expression '>' shift_expression
+														 | relational_expression '<=' shift_expression
+														 | relational_expression '>=' shift_expression
+														 | relational_expression 'is' type
+														 | relational_expression 'as' type.*/
+
+
+/* relational_expression = 
+							  shift_expression relational_expression_aux
+							| type relational_expression_aux_aux*/
+
+boolean 	_relational_expression(){
+	boolean result;
+
+
+		if (_shift_expression())
+		{
+			token=_lire_token();
+
+			if (_relational_expression_aux())
+			{
+				result=true;
+			}else{
+				result=false;
+			}
+		}else{
+
+			if (_type())
+			{
+				
+				token=_lire_token();
+
+				if (_relational_expression_aux_aux())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}
+			}else{
+
+				result=false;
+			}
+		}
+
+	return result;
+}
+
+/* relational_expression_aux =
+						   '<' shift_expression relational_expression_aux
+					 	|  '>' shift_expression relational_expression_aux
+					 	|  '<=' shift_expression relational_expression_aux
+					 	|  '>=' shift_expression relational_expression_aux
+					 	| eps */
+
+boolean 	_relational_expression_aux(){
+	boolean result;
+
+
+	if (token==PVIRG) /** follows **/
+	{
+		result=true;
+		follow_token=true;
+	}else{
+
+		if (token==LT)
+		{
+			token=_lire_token();
+
+			if (_relational_expression())
+			{
+				result=true;
+			}else{
+
+					result=false;
+			}
+		}else{
+
+			if (token==GT)
+			{
+				token=_lire_token();
+
+				if (_relational_expression())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}
+			}else{
+
+
+				if (token==LEQ)
+				{
+					token=_lire_token();
+
+					if (_relational_expression())
+					{
+						result=true;
+					}else{
+
+						result=false;
+					}
+				}else{
+
+							if (token==GEQ)
+							{
+								token=_lire_token();
+
+								if (_relational_expression())
+								{
+									result=true;
+								}else{
+
+									result=false;
+								}
+							}else{
+									result=false
+								}
+					}
+
+			}
+		}
+	}
+
+	return result;
+}
+
+/* relational_expression_aux_aux =
+							 	|  'is' type relational_expression_aux_aux
+						 		|  'as' type relational_expression_aux_aux
+						 		| eps */
+
+boolean 	_relational_expression_aux_aux(){
+	boolean result;
+
+
+
+	return result;
+}
+
+/*******************************************equality_expression =
+														relational_expression
+														 | equality_expression '==' relational_expression
+														 | equality_expression '!=' relational_expression.*/
+
+
+/* equality_expression = relational_expression equality_expression_aux */
+
+boolean 	_equality_expression(){
+	boolean result;
+
+		if (_relational_expression())
+		{
+			token=_lire_token()
+
+			if (_equality_expression_aux())
+			{
+				result=true;
+			}else{
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+	return result;
+}
+
+
+/* equality_expression_aux =
+							|  '==' relational_expression equality_expression_aux
+							|  '!=' relational_expression equality_expression_aux
+							| eps */
+
+boolean 	_equality_expression_aux(){
+	boolean result;
+
+
+		if (token==PVIRG || token==PCLOSE)
+		{
+			result=true;
+		}else{
+
+			if (token==EQEQ)
+			{
+				token=_lire_token();
+
+				if (_equality_expression())
+				{
+					result=true;
+				}else{
+					result=false;
+				}
+			}else{
+
+				if (token==NOTEQ)
+				{
+					token=_lire_token();
+
+					if (_equality_expression())
+					{
+						result=true;
+					}else{
+						result=false;
+					}
+				}else{
+
+					result=false;
+				}
+			}
+		}
+
+	return result;
+}
+
+
+/*****************************************and_expression =
+													equality_expression
+													 | and_expression '&' equality_expression.*/
+
+/*	and_expression = equality_expression and_expression_aux */
+
+boolean 	_and_expression(){
+	boolean result;
+
+		if (_equality_expression())
+		{
+			token=_lire_token();
+
+			if (_and_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+	return result;
+}
+
+/* and_expression_aux =
+						'&'	equality_expression and_expression_aux
+						| eps */
+
+boolean 	_and_expression_aux(){
+	boolean result;
+
+		if (token==PVIRG)
+		{
+			result=true;
+			follow_token=true;
+		}else{
+
+			if (token==AND)
+			{
+				token=_lire_token();
+
+				if (_and_expression())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}
+			}else{
+
+				result=false;
+			}
+		}
+
+	return result;
+}
+
+/****************************************exclusive_or_expression =
+																and_expression
+																 | exclusive_or_expression '^' and_expression.*/
+
+/* exclusive_or_expression = and_expression exclusive_or_expression_aux */
+
+
+boolean 	_exclusive_or_expression(){
+	boolean result;
+
+		if (_and_expression())
+		{
+			token=_lire_token();
+
+			if (_exclusive_or_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+	return result;
+}
+
+/* exclusive_or_expression_aux =
+								'^' and_expression exclusive_or_expression_aux
+								| eps */
+boolean 	_exclusive_or_expression_aux(){
+	boolean result;
+
+		if (token==PVIRG)
+		{
+			result=true;
+		}else{
+
+			if (token==XOR)
+			{
+				token=_lire_token();
+
+				if (_exclusive_or_expression())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}
+			}else{
+
+				result=false;
+			}
+		}
+
+	return result;
+}
+
+/***************************************inclusive_or_expression =
+																exclusive_or_expression
+																 | inclusive_or_expression '|' exclusive_or_expression.*/
+
+
+
+/*	inclusive_or_expression = exclusive_or_expression inclusive_or_expression_aux */
+
+boolean 	_inclusive_or_expression(){
+	boolean result;
+
+		if (_exclusive_or_expression())
+		{
+			token=_lire_token();
+
+			if (_inclusive_or_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+	return result;
+}
+
+/* inclusive_or_expression_aux = 
+								'|' exclusive_or_expression inclusive_or_expression_aux
+								| eps */
+
+boolean 	_inclusive_or_expression_aux(){
+	boolean result;
+
+		if (token==PVIRG)
+		{
+			result=true;
+			follow_token=true;
+		}else{
+
+			if (token==OR)
+			{
+				token=_lire_token();
+
+				if (_inclusive_or_expression())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}
+			}else{
+
+				result=false;
+			}
+		}
+
+	return result;
+}
+
+/***********************conditional_and_expression =
+												inclusive_or_expression
+												 | conditional_and_expression '&&' inclusive_or_expression.*/
+
+/* conditional_and_expression = inclusive_or_expression conditional_and_expression_aux */
+
+boolean 	_conditional_and_expression(){
+	boolean result;
+
+		if (_inclusive_or_expression())
+		{
+			token=_lire_token();
+
+			if (_conditional_and_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+	return result;
+}
+
+/* conditional_and_expression_aux = 
+									'&&' inclusive_or_expression conditional_and_expression_aux
+									| eps */
+
+boolean 	_conditional_and_expression_aux(){
+	boolean result;
+
+			if (token==PVIRG)
+			{
+				result=true;
+			}else{
+
+				if (token==ANDAND)
+				{
+					token=_lire_token();
+
+					if (conditional_and_expression())
+					{
+						result=true;
+					}else{
+						result=false;
+					}
+				}else{
+					result=false;
+				}
+
+			}
+	return result;
+}
 
 /***************conditional_expression =
 					null_coalescing_expression
@@ -651,9 +1393,69 @@ boolean _non_assignment_expression(){
 
 /*conditional_expression = null_coalescing_expression conditional_expression_aux*/
 
+boolean 	_conditional_expression(){
+	boolean result;
+
+	 	if (_null_coalescing_expression())
+	 	{
+	 		token=_lire_token();
+	 		if (_conditional_expression_aux())
+	 		{
+	 			result=true;
+	 		}else{
+
+	 			result=false;
+	 		}
+	 	}else{
+
+	 		result=false;
+	 	}
+
+	return result;
+}
 
 /*conditional_expression_aux='?' expression ':' expression | eps */
 
+boolean _conditional_expression_aux(){
+	boolean result;
+
+
+	if (token==PVIRG || token==VIRG	)
+	{
+		result=true;
+		follow_token=true;
+	}else{
+	if (token==POINTINTER)
+	{
+		token=_lire_token();
+
+		if (_expression())
+		{
+			token=_lire_token();
+			if (token==DOUBLEDOT)
+			{
+				token=_lire_token();
+				if (_expression())
+				{
+					result=true
+				}else{
+
+					result=false;
+				}
+			}else{
+
+				result=false;
+
+			}
+		}else{
+
+			result=false;
+		}
+	}
+}
+
+	return result;
+}
 
 /***************	null_coalescing_expression =
 						conditional_or_expression
@@ -661,10 +1463,63 @@ boolean _non_assignment_expression(){
 
 /*null_coalescing_expression  = conditional_or_expression null_coalescing_expression_aux*/
 
+boolean 	_null_coalescing_expression(){
+	boolean result;
 
+	if (_conditional_or_expression())
+	{
+		token=_lire_token();
+		if (_null_coalescing_expression_aux())
+		{
+			result=true;
+		}else{
+
+			result=false;
+		}
+	}else{
+
+		result=false;
+	}
+
+
+
+	return result;
+}
 
 
 /*null_coalescing_expression_aux= '??' null_coalescing_expression | eps.*/
+
+
+boolean _null_coalescing_expression_aux(){
+	boolean result;
+
+	if (token==POINTINTER || token==PVIRG)
+	{
+		follow_token=true;
+		result=true;
+	}else{
+
+		if (token==NULLCOALESCING)
+		{
+			token=_lire_token();
+			if (_null_coalescing_expression())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}	
+		}else{
+
+			result=false;
+		}
+	}
+	return result;
+}
+
+
+
+
 
 /****************conditional_or_expression =
 					conditional_and_expression
@@ -673,7 +1528,40 @@ boolean _non_assignment_expression(){
 
 /*conditional_or_expression = conditional_and_expression conditional_or_expression_aux.*/
 
+boolean 	_conditional_or_expression(){
+	boolean result;
+
+		if (_conditional_and_expression())
+		{
+			token=_lire_token();
+			if (_conditional_or_expression_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+
+	return result;
+}
+
 /*conditional_or_expression_aux = '||' conditional_and_expression conditional_or_expression_aux | aps .*/
+
+boolean 	_conditional_or_expression_aux(){
+	boolean result;
+
+		if (token===)
+		{
+			/* code */
+		}
+
+	return result;
+}
 
 /*constant_expression =
 	expression.*/
@@ -756,33 +1644,178 @@ boolean _statement(){
 boolean _embedded_statement(){
 	boolean result;
 
+		if (_block())
+		{
+			result=true;
+		}else{
+
+			if (_empty_statement())
+			{
+				result=true;
+			}else{
+
+				if (_expression_statement())
+				{
+					result=true;
+				}else{
+						
+					if (_selection_statement())
+					{
+						result=true;
+					}else{
+						
+						if (_iteration_statement())
+						{
+							result=true;
+						}else{
+						
+							result=false;  /// les autres statements pour une autre version
+			
+						}
+			
+					}
+
+			
+				}
+			
+			}
+
+		}
 
 	return result;
 }
+
 
 /*block =
 	'{' [statement_list] '}'.*/
 
 boolean _block(){
+	boolean result;
 
+		if (token==BOPEN)
+		{
+			token=_lire_token();
 
+			if (token=BCLOSE)
+			{
+				result=true;
+			}else{
+
+				if (_statement_list())
+					{
+						token=_lire_token();
+
+						if (token==BCLOSE)
+						{
+							result=true;
+						}else{
+							result=false;
+						}
+					}else{
+						result=false;
+					}	
+
+			}
+		}else{
+			result=false;
+		}
+
+	return result;
 }
 
-/*statement_list =
-	statement
-	 | statement_list statement.*/
+/******************************************statement_list =
+														statement
+														 | statement_list statement.*/
+
+/* statement_list = statement statement_list_aux */
+
+boolean 	_statement_list(){
+	boolean result;
+
+		if (_statement())
+		{
+			token=_lire_token();
+
+			if (_statement_list_aux())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+
+	return result;
+}
+
+/* statement_list_aux = 
+						statement statement_list_aux
+						| eps */
+
+boolean 	_statement_list_aux(){
+	boolean result;
+
+		if (token==PVIRG)
+		{
+			result=true;
+			follow_token=true;
+		}else{
+
+			if (_statement_list())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}
+
+	return result;
+}
 
 /*empty_statement = ';'.*/
 
+boolean 	_empty_statement(){
+	boolean result;
 
+		if (token==PVIRG)
+		{
+			result=true;
+		}else{
+
+			result=false;
+		}
+	return result;
+}
 
 /*labeled_statement = identifier ':' statement.*/
 
 /*expression_statement =
 	statement_expression ';'.*/
-boolean _expression(){
+boolean _expression_statement(){
+	boolean result;
 
-	
+		if (_statement_expression())
+		{
+			token=_lire_token();
+
+			if (token==PVIRG)
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+
+	return result;
 }
 
 /*statement_expression =
@@ -795,6 +1828,20 @@ boolean _expression(){
 	 | pre_decrement_expression.*/
 
 
+boolean 	_statement_expression(){
+	boolean result;
+
+		if (_assignment())
+		{
+			result=true;
+
+		}else{
+
+			result=false; /// les autres statements pour une autre version
+		}
+
+	return result;
+}
 
 
 
@@ -875,6 +1922,169 @@ boolean _expression(){
 /*statement_expression_list =
 	statement_expression
 	 | statement_expression_list ',' statement_expression.*/
+/* abad mohamed zayd  ________________________________________________________________*/
+
+/*for_statement =
+	'for' '(' [for_initializer] ';' [for_condition] ';' [for_iterator] ')' embedded_statement.*/
+
+boolean _for_statement(){
+	
+	boolean result = false; 
+	
+	token = _lire_token();
+	
+	if(token == FOR){
+		
+		token = _lire_token();
+		
+		if(token == POPEN){
+
+			if(_for_initializer() || !_for_initializer()){
+
+				token = _lire_token();
+
+				if(token == PVIRG){
+
+					if(_for_condition() || !_for_condition()){
+
+						token = _lire_token();
+
+						if(token == PVIRG){
+
+							if(_for_iterator() || !_for_iterator()){
+
+								token = _lire_token();
+
+								if(token == PCLOSE){
+
+									if(_embedded_statement()){
+
+										result = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result; 
+}
+
+
+/*for_initializer =
+	local_variable_declaration
+	 | statement_expression_list.*/
+
+boolean _for_initializer(){
+
+	boolean result = false;
+
+	if(_local_variable_declaration()){
+
+		result = true;
+	}
+
+	else{
+
+		if(_statement_expression_list()){
+
+			result = true; 
+		}
+	}
+
+	return result; 
+}
+
+/*for_condition =
+	boolean_expression.*/
+
+boolean _for_condition(){
+
+	boolean result = false; 
+
+	if(_boolean_expression()){ //boolean_expression ma3reftch finahiya 
+
+		result = true; 
+	}
+
+	return result; 
+}
+
+/*for_iterator =
+	statement_expression_list.*/
+
+boolean _for_iterator(){
+
+	boolean result = false; 
+
+	if(_statement_expression_list()){
+
+		result = true; 
+	}
+
+	return result; 
+
+}
+
+/*statement_expression_list =
+	statement_expression
+	 | statement_expression_list ',' statement_expression.
+
+	En éliminant la récursivité gauche, j'ai obtenu : 
+
+	statement_expression_list = statement_expression statement_expression_list_aux
+	
+	statement_expression_list_aux = ',' statement_expression statement_expression_list_aux
+											| statement_expression
+	*/
+
+boolean _statement_expression_list(){
+
+	boolean result = false;
+
+	if(_statement_expression()){
+
+		if(_statement_expression_list_aux()){
+
+			result = true; 
+
+		}
+	}
+
+	return result; 
+}
+
+boolean _statement_expression_list_aux(){
+
+	boolean result = false; 
+
+	token  = _lire_token();
+
+	if(_statement_expression()){
+
+		result = true; 
+	}
+	else{
+		if(token == VIRG){
+
+			if(_statement_expression()){
+
+				if(_statement_expression_list_aux()){
+
+					result = true; 
+				}
+			}
+		}
+	}
+
+	return result; 
+	
+}
+
+
 
 
 int main(){
