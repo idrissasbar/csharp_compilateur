@@ -449,7 +449,15 @@ if (debug) printf ("%s \n ","_expression");
 	{
 		result=true;
 	}else{
+
+		if (_non_assignment_expression())
+		{
+			result=true;
+		}else{
+
 		result=false;
+			
+		}
 	}
 	return result;
 }
@@ -599,11 +607,20 @@ primary_no_array_creation_expression =
 boolean _primary_no_array_creation_expression(){
 	boolean result;
 if (debug) printf ("%s \n ","_primary_no_array_creation_expression");
+
 	if (_literal())
 	{
 		result=true;
 	}else{
+
+		if (_simple_name())
+		{
+			result=true;
+		}else{
+
 		result=false;
+			
+		}
 	}
 
 	return result;
@@ -619,6 +636,7 @@ literal =
 */
 boolean _literal(){
 	boolean result;
+
 if (debug) printf ("%s \n ","_literal");
 
 	if (token==FALSE)
@@ -647,6 +665,26 @@ if (debug) printf ("%s \n ","_literal");
 
 	return result;
 }
+
+
+
+/*simple_name =
+	identifier [type_argument_list]. */
+
+boolean 	_simple_name(){
+	boolean result;
+
+			if (token==IDF)
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+	return result;
+}
+
+
 
 /*  driss asbar ______________________________________________*/
 
@@ -1044,7 +1082,7 @@ boolean 	_relational_expression_aux(){
 									result=false;
 								}
 							}else{
-									result=false
+									result=false;
 								}
 					}
 
@@ -1081,7 +1119,7 @@ boolean 	_equality_expression(){
 
 		if (_relational_expression())
 		{
-			token=_lire_token()
+			token=_lire_token();
 
 			if (_equality_expression_aux())
 			{
@@ -1372,7 +1410,7 @@ boolean 	_conditional_and_expression_aux(){
 				{
 					token=_lire_token();
 
-					if (conditional_and_expression())
+					if (_conditional_and_expression())
 					{
 						result=true;
 					}else{
@@ -1437,7 +1475,7 @@ boolean _conditional_expression_aux(){
 				token=_lire_token();
 				if (_expression())
 				{
-					result=true
+					result=true;
 				}else{
 
 					result=false;
@@ -1550,14 +1588,35 @@ boolean 	_conditional_or_expression(){
 	return result;
 }
 
-/*conditional_or_expression_aux = '||' conditional_and_expression conditional_or_expression_aux | aps .*/
+/*conditional_or_expression_aux = 
+								'||' conditional_and_expression conditional_or_expression_aux 
+								| eps .*/
 
 boolean 	_conditional_or_expression_aux(){
 	boolean result;
 
-		if (token===)
+		if (token==PVIRG)
 		{
-			/* code */
+			result=true;
+			follow_token=true;
+		}else{
+
+
+			if (token==OROR)
+			{
+				token=_lire_token();
+
+				if (_conditional_or_expression())
+				{
+					result=true;
+				}else{
+
+					result=false;
+				}
+			}else{
+
+				result=false;
+			}
 		}
 
 	return result;
@@ -1566,7 +1625,7 @@ boolean 	_conditional_or_expression_aux(){
 /*constant_expression =
 	expression.*/
 
-boolean constant_expression(){
+boolean _constant_expression(){
 	boolean result;
 
 	if (_expression())
@@ -1844,50 +1903,283 @@ boolean 	_statement_expression(){
 }
 
 
-
-
-
-
-
-
-
-/* zakaria                               */
+/* zakaria   ****************** DONE ********************    */
 
 /*selection_statement =
 	if_statement
 	 | switch_statement.*/
 
+boolean _selection_statement(){
+	boolean result;
+	if(_if_statement()){
+		result=true;
+	}else{
+		if(_switch_statement()){
+			result=true;
+		}else{
+			result=false;
+		}
+	}
+	return result;
+}
+
+
 /*if_statement =
 	'if' '(' boolean_expression ')' embedded_statement
 	 | 'if' '(' boolean_expression ')' embedded_statement 'else' embedded_statement.*/
 
+boolean _if_statement(){
+	boolean result;
+	if(token==IF){
+		token=_lire_token();
+		if(token==POPEN){
+			token=_lire_token();
+			if(_boolean_expression()){
+				token=_lire_token();
+				if(token==PCLOSE){
+					token=_lire_token();
+					if(_embedded_statement()){
+						result=true;
+						token=_lire_token();
+						if(token==ELSE){
+							token=_lire_token();
+							if(_embedded_statement()){
+								result=true;
+							}else{
+								result=false;
+							}
+						}else{
+							result=false;
+						}
+					}else{
+						result=false;
+					}
+				}else{
+					result=false;
+				}
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+
+	return result;
+}
 /*switch_statement =
 	'switch' '(' expression ')' switch_block.*/
+
+boolean _switch_statement(){
+	boolean result;
+
+	if(token==SWITCH){
+		token=_lire_token();
+
+		if(token==POPEN){
+			token=_lire_token();
+
+			if(_expression()){
+				token=_lire_token();
+
+				if(token==PCLOSE){
+					token=_lire_token();
+
+					if(_switch_block()){
+						result=true;
+					}else{
+						result=false;
+					}
+				}else{
+					result=false;
+				}
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+
+	return result;
+}
 
 /*switch_block =
 	'{' [switch_sections] '}'.*/
 
-/*switch_sections =
+boolean _switch_block(){
+	boolean result;
+	if(token==BOPEN){
+		token=_lire_token();
+		if(_switch_sections() || !_switch_sections()){
+			token=_lire_token();
+			if(token==BCLOSE){
+				result=true;
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+					
+	return result;
+}
+
+/****** switch_sections =
 	switch_section
 	 | switch_sections switch_section.*/
+
+/*switch_sections = switch_section switch_sections_aux.*/
+
+boolean _switch_sections(){
+	boolean result;
+	if(_switch_section()){
+		token=_lire_token();
+		if(_switch_sections_aux()){
+			result=true;
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+	
+	return result;
+}
+
+/*switch_sections_aux = switch_section switch_sections_aux | eps */
+	
+boolean _switch_sections_aux(){
+	boolean result;
+	if(token==BCLOSE){
+		result=true;
+		follow_token=true;
+	}else{
+		if(_switch_section()){
+			token=_lire_token();
+			if(_switch_sections_aux()){
+				result=true;
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}
+	}
+
+	return result;
+}
 
 /*switch_section =
 	switch_labels statement_list.*/
 
-/******* switch_labels =
+boolean _switch_section(){
+	boolean result;
+	if(_switch_labels()){
+		token=_lire_token();
+		if(_statement_list()){
+			result=true;
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+
+	return  result;
+}
+
+/****** switch_labels =
 	   		switch_label
 	 		| switch_labels switch_label.*/
-
 
 /*switch_labels =
 	   		switch_label switch_labels_aux
 	 		*/
 
+boolean _switch_labels(){
+	boolean result;
+	if(_switch_label()){
+		token=_lire_token();
+		if(_switch_labels_aux()){
+			result=true;
+		}else{
+			result=false;
+		}
+	}else{
+		result=false;
+	}
+	
+	return result;
+}
+
 /*switch_labels_aux = switch_label switch_labels_aux | eps */
+
+boolean _switch_labels_aux(){
+	boolean result;
+	if(_statement_list()){
+		result=true;
+		follow_token=true;
+	}else{
+		if(_switch_label()){
+
+			token=_lire_token();
+
+			if(_switch_labels_aux())
+			{
+				result=true;
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}
+	}
+
+	return result;
+}
 
 /*switch_label =
 	'case' constant_expression ':'
 	 | 'default' ':'.*/
+	 
+boolean _switch_label(){
+	boolean result;
+	if(token==CASE){
+		token=_lire_token();
+		if(_constant_expression()){
+			token=_lire_token();
+			if(token==DOUBLEDOT){
+				result=true;
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}
+	}else{
+		if(token==DEFAULT){
+			token=_lire_token();
+			if(token==DOUBLEDOT){
+				result=true;
+			}else{
+				result=false;
+			}
+		}else{
+			result=false;
+		}		
+	}
+				
+	return result;
+}
+/*  **************** Fin Zakaria ********************  */
 	 
 
 /*   idriss ait hafid ________________________________________________________________*/
@@ -2166,7 +2458,7 @@ boolean _statement_expression_list_aux(){
 
 int main(){
 	token=_lire_token();
-	if(_declaration_statement()){
+	if(_expression()){
 		printf("ok\n");
 	}else{
 		printf("nno\n");
