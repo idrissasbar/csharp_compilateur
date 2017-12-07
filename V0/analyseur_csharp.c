@@ -19,6 +19,7 @@ boolean follow_token=false;
 
 typetoken _lire_token(){
 
+
 	if(follow_token){
 		follow_token = false; 
 		return token; 
@@ -38,6 +39,9 @@ type =
 boolean _type(){
 	boolean result;
 
+	if (debug) printf ("%s \n ","_type");
+
+
 	if (_value_type())	
 	{
 		result=true;
@@ -55,6 +59,8 @@ value_type =
 	 | enum_type.*/
 boolean _value_type(){
 	boolean result;
+
+	if (debug) printf ("%s \n ","_value_type");
 
 	if (_struct_type())
 	{
@@ -75,6 +81,8 @@ struct_type =
 boolean _struct_type(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_struct_type");
+
 	if (_simple_type())
 	{
 		result=true;	
@@ -91,6 +99,9 @@ simple_type =
 	 | 'bool'.*/
 boolean _simple_type(){
 	boolean result;
+
+			if (debug) printf ("%s \n ","_simple_type");
+
 
 		if (token==BOOL)
 		{
@@ -113,6 +124,8 @@ numeric_type =
 	 | 'decimal'.*/
 boolean _numeric_type(){
 	boolean result;
+
+	if (debug) printf ("%s \n ","_numeric_type");
 
 	if (token==DECIMAL)
 	{
@@ -151,6 +164,9 @@ integral_type =
 boolean _integral_type(){
 	boolean result;
      
+		if (debug) printf ("%s \n ","_integral_type");
+
+
     switch(token){
     	case SBYTE : result = true; 
 
@@ -191,6 +207,10 @@ boolean _integral_type(){
 	 | 'double'.*/
 boolean _floating_point_type(){
 	boolean result;
+
+		if (debug) printf ("%s \n ","_floating_point_type");
+
+
 	if (token == FLOAT) {
 		result = true;
 	}else{
@@ -241,7 +261,7 @@ declaration_statement =
 
 boolean _declaration_statement(){
 	boolean result;
-	if (debug) printf ("%s \n ","dec");
+	if (debug) printf ("%s \n ","_declaration_statement");
 	if (_local_variable_declaration())
 	{
 		token=_lire_token();
@@ -265,7 +285,7 @@ local_variable_declaration =
 
 boolean _local_variable_declaration(){
 	boolean result;
-	if (debug) printf ("%s \n ","loc_var_dec");
+	if (debug) printf ("%s \n ","_local_variable_declaration");
 	if (_local_variable_type())
 	{
 		token=_lire_token();
@@ -401,9 +421,12 @@ if (debug) printf ("%s \n ","_local_variable_declarator");
 boolean _local_variable_declarator_aux(){
 	boolean result;
 
+	if (debug) printf ("%s \n ","_local_variable_declarator_aux");
+
 	if (token==VIRG || token==PVIRG)
 	{
 		result=true;
+		follow_token=true;
 	}else{
 
 		token=_lire_token();
@@ -618,7 +641,14 @@ if (debug) printf ("%s \n ","_primary_no_array_creation_expression");
 			result=true;
 		}else{
 
-		result=false;
+			if (_parenthesized_expression())
+			{
+				result=true;
+			}else{
+
+			result=false;
+			
+			}
 			
 		}
 	}
@@ -674,6 +704,8 @@ if (debug) printf ("%s \n ","_literal");
 boolean 	_simple_name(){
 	boolean result;
 
+	if (debug) printf ("%s \n ","_simple_name");
+
 			if (token==IDF)
 			{
 				result=true;
@@ -684,7 +716,43 @@ boolean 	_simple_name(){
 	return result;
 }
 
+/*parenthesized_expression =
+	'(' expression ')'. */
 
+
+boolean 	_parenthesized_expression(){
+	boolean result;
+
+		if (debug) printf ("%s \n ","_parenthesized_expression");
+
+
+	if (token==POPEN)
+	{
+		token=_lire_token();
+
+		if (_expression())
+		{
+			token=_lire_token();
+
+			if (token==PCLOSE)
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
+		}else{
+
+			result=false;
+		}
+	}else{
+
+		result=false;
+	}
+
+
+	return result;
+}
 
 /*  driss asbar ______________________________________________*/
 
@@ -698,6 +766,9 @@ non_assignment_expression =
 
 boolean _non_assignment_expression(){
 	boolean result;
+
+		if (debug) printf ("%s \n ","non_assignment_expression");
+
 
 		if (_conditional_expression())
 		{
@@ -1595,7 +1666,7 @@ boolean 	_conditional_or_expression(){
 boolean 	_conditional_or_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG)
+		if (token==PVIRG || token==PCLOSE)
 		{
 			result=true;
 			follow_token=true;
@@ -2458,7 +2529,8 @@ boolean _statement_expression_list_aux(){
 
 int main(){
 	token=_lire_token();
-	if(_expression()){
+
+	if(_while_statement()){
 		printf("ok\n");
 	}else{
 		printf("nno\n");

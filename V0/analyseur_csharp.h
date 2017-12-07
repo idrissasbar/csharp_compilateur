@@ -373,6 +373,12 @@ boolean _literal();
 
 boolean 	_simple_name();
 
+/*parenthesized_expression =
+	'(' expression ')'. */
+
+
+boolean 	_parenthesized_expression();
+
 /*  driss asbar ______________________________________________*/
 
 
