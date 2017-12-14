@@ -361,20 +361,20 @@ if (debug) printf ("%s \n ","local_variable_declarators_aux");
 		if (token==VIRG)
 		{
 		
-		token=_lire_token();
-		if (_local_variable_declarator())	
-		{
 			token=_lire_token();
-			if (_local_variable_declarators())
+			if (_local_variable_declarators())	
 			{
-				result=true;
+				/*token=_lire_token();
+				if (_local_variable_declarators())
+				{*/
+					result=true;
+				/*}else{
+					result=false;
+				}*/
+
 			}else{
 				result=false;
 			}
-
-		}else{
-			result=false;
-		}
 		}else{
 			result=false;
 		}
@@ -429,15 +429,22 @@ boolean _local_variable_declarator_aux(){
 		follow_token=true;
 	}else{
 
-		token=_lire_token();
-
-		if (_local_variable_initializer())
+		if (token==EQ)
 		{
-			result=true;
+			token=_lire_token();
+
+			if (_local_variable_initializer())
+			{
+				result=true;
+			}else{
+
+				result=false;
+			}
 		}else{
 
 			result=false;
 		}
+		
 	}
 
 	return result;
@@ -458,6 +465,9 @@ if (debug) printf ("%s \n ","_local_variable_initializer");
 	}else{
 		result=false;
 	}
+
+if (debug) printf ("%s \n ","FIN _local_variable_initializer");
+
 	return result;
 }
 
@@ -468,12 +478,12 @@ expression =
 boolean _expression(){
 	boolean result;
 if (debug) printf ("%s \n ","_expression");
-	if (_assignment())
+	if (_non_assignment_expression())
 	{
 		result=true;
 	}else{
 
-		if (_non_assignment_expression())
+		if (_assignment())
 		{
 			result=true;
 		}else{
@@ -482,6 +492,9 @@ if (debug) printf ("%s \n ","_expression");
 			
 		}
 	}
+
+	if (debug) printf ("%s \n ","FIN _expression");
+
 	return result;
 }
 
@@ -793,6 +806,10 @@ boolean _non_assignment_expression(){
 boolean 	_multiplicative_expression(){
 	boolean result;
 
+
+			if (debug) printf ("%s \n ","_multiplicative_expression");
+
+
 		if (_unary_expression())
 		{
 			token=_lire_token();
@@ -820,7 +837,10 @@ boolean 	_multiplicative_expression(){
 boolean _multiplicative_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG)
+			if (debug) printf ("%s \n ","_multiplicative_expression_aux");
+
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
 			follow_token=true;
@@ -887,6 +907,8 @@ boolean _multiplicative_expression_aux(){
 boolean 	_additive_expression(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_additive_expression");
+
 		if (_multiplicative_expression())
 		{
 			token=_lire_token();
@@ -914,9 +936,13 @@ boolean 	_additive_expression(){
 boolean 	 _additive_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG)
+			if (debug) printf ("%s \n ","_additive_expression_aux");
+
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
+			follow_token=true;
 		}else{
 
 			if (token==PLUS)
@@ -965,6 +991,9 @@ boolean 	 _additive_expression_aux(){
 boolean 	_shift_expression(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_shift_expression");
+
+
 		if (_additive_expression())
 		{
 			token=_lire_token();
@@ -993,9 +1022,13 @@ boolean 	_shift_expression(){
 boolean _shift_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG)
+			if (debug) printf ("%s \n ","_shift_expression_aux");
+
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
+			follow_token=true;
 			
 		}else{
 			if (token==LTLT)
@@ -1050,6 +1083,8 @@ boolean _shift_expression_aux(){
 boolean 	_relational_expression(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_relational_expression");
+
 
 		if (_shift_expression())
 		{
@@ -1094,8 +1129,10 @@ boolean 	_relational_expression(){
 boolean 	_relational_expression_aux(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_relational_expression_aux");
 
-	if (token==PVIRG) /** follows **/
+
+	if (token==PVIRG || token==PCLOSE || token==VIRG) /** follows **/
 	{
 		result=true;
 		follow_token=true;
@@ -1188,6 +1225,9 @@ boolean 	_relational_expression_aux_aux(){
 boolean 	_equality_expression(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_equality_expression");
+
+
 		if (_relational_expression())
 		{
 			token=_lire_token();
@@ -1215,10 +1255,13 @@ boolean 	_equality_expression(){
 boolean 	_equality_expression_aux(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_equality_expression_aux");
 
-		if (token==PVIRG || token==PCLOSE)
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
+			follow_token=true;
 		}else{
 
 			if (token==EQEQ)
@@ -1263,6 +1306,8 @@ boolean 	_equality_expression_aux(){
 boolean 	_and_expression(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_and_expression");
+
 		if (_equality_expression())
 		{
 			token=_lire_token();
@@ -1289,7 +1334,10 @@ boolean 	_and_expression(){
 boolean 	_and_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG)
+			if (debug) printf ("%s \n ","_and_expression_aux");
+
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
 			follow_token=true;
@@ -1325,6 +1373,8 @@ boolean 	_and_expression_aux(){
 boolean 	_exclusive_or_expression(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_exclusive_or_expression");
+
 		if (_and_expression())
 		{
 			token=_lire_token();
@@ -1350,9 +1400,12 @@ boolean 	_exclusive_or_expression(){
 boolean 	_exclusive_or_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG)
+		if (debug) printf ("%s \n ","exclusive_or_expression_aux");
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
+			follow_token=true;
 		}else{
 
 			if (token==XOR)
@@ -1386,6 +1439,9 @@ boolean 	_exclusive_or_expression_aux(){
 boolean 	_inclusive_or_expression(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_inclusive_or_expression");
+
+
 		if (_exclusive_or_expression())
 		{
 			token=_lire_token();
@@ -1412,7 +1468,10 @@ boolean 	_inclusive_or_expression(){
 boolean 	_inclusive_or_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG)
+			if (debug) printf ("%s \n ","_inclusive_or_expression_aux");
+
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
 			follow_token=true;
@@ -1446,6 +1505,7 @@ boolean 	_inclusive_or_expression_aux(){
 
 boolean 	_conditional_and_expression(){
 	boolean result;
+		if (debug) printf ("%s \n ","_conditional_and_expression");
 
 		if (_inclusive_or_expression())
 		{
@@ -1471,10 +1531,12 @@ boolean 	_conditional_and_expression(){
 
 boolean 	_conditional_and_expression_aux(){
 	boolean result;
+		if (debug) printf ("%s \n ","_conditional_and_expression_aux");
 
-			if (token==PVIRG)
+			if (token==PVIRG || token==PCLOSE || token==VIRG)
 			{
 				result=true;
+				follow_token=true;
 			}else{
 
 				if (token==ANDAND)
@@ -1505,6 +1567,9 @@ boolean 	_conditional_and_expression_aux(){
 boolean 	_conditional_expression(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_conditional_expression");
+
+
 	 	if (_null_coalescing_expression())
 	 	{
 	 		token=_lire_token();
@@ -1528,8 +1593,9 @@ boolean 	_conditional_expression(){
 boolean _conditional_expression_aux(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_conditional_expression_aux");
 
-	if (token==PVIRG || token==VIRG	)
+	if (token==PVIRG || token==VIRG	|| token==PCLOSE)
 	{
 		result=true;
 		follow_token=true;
@@ -1575,6 +1641,8 @@ boolean _conditional_expression_aux(){
 boolean 	_null_coalescing_expression(){
 	boolean result;
 
+		if (debug) printf ("%s \n ","_null_coalescing_expression");
+
 	if (_conditional_or_expression())
 	{
 		token=_lire_token();
@@ -1602,7 +1670,10 @@ boolean 	_null_coalescing_expression(){
 boolean _null_coalescing_expression_aux(){
 	boolean result;
 
-	if (token==POINTINTER || token==PVIRG)
+			if (debug) printf ("%s \n ","_null_coalescing_expression_aux");
+
+
+	if (token==POINTINTER || token==PVIRG || token==VIRG || token==PCLOSE)
 	{
 		follow_token=true;
 		result=true;
@@ -1640,6 +1711,9 @@ boolean _null_coalescing_expression_aux(){
 boolean 	_conditional_or_expression(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_conditional_or_expression");
+
+
 		if (_conditional_and_expression())
 		{
 			token=_lire_token();
@@ -1666,7 +1740,10 @@ boolean 	_conditional_or_expression(){
 boolean 	_conditional_or_expression_aux(){
 	boolean result;
 
-		if (token==PVIRG || token==PCLOSE)
+			if (debug) printf ("%s \n ","_conditional_or_expression_aux");
+
+
+		if (token==PVIRG || token==PCLOSE || token==VIRG)
 		{
 			result=true;
 			follow_token=true;
@@ -1699,6 +1776,9 @@ boolean 	_conditional_or_expression_aux(){
 boolean _constant_expression(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_constant_expression");
+
+
 	if (_expression())
 	{
 		result=true;
@@ -1716,6 +1796,7 @@ boolean _constant_expression(){
 
 boolean _boolean_expression(){
 	boolean result;
+		if (debug) printf ("%s \n ","_boolean_expression");
 
 	if (_expression())
 	{
@@ -1736,7 +1817,8 @@ boolean _boolean_expression(){
 boolean _statement(){
 	boolean result;
 
-	
+			if (debug) printf ("%s \n ","_statement");
+
 		if (_declaration_statement())
 		{
 			result=true;
@@ -1773,6 +1855,9 @@ boolean _statement(){
 
 boolean _embedded_statement(){
 	boolean result;
+
+			if (debug) printf ("%s \n ","_embedded_statement");
+
 
 		if (_block())
 		{
@@ -1821,6 +1906,7 @@ boolean _embedded_statement(){
 
 boolean _block(){
 	boolean result;
+		if (debug) printf ("%s \n ","_block");
 
 		if (token==BOPEN)
 		{
@@ -1862,6 +1948,9 @@ boolean _block(){
 boolean 	_statement_list(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_statement_list");
+
+
 		if (_statement())
 		{
 			token=_lire_token();
@@ -1888,8 +1977,9 @@ boolean 	_statement_list(){
 
 boolean 	_statement_list_aux(){
 	boolean result;
+		if (debug) printf ("%s \n ","_statement_list_aux");
 
-		if (token==PVIRG)
+		if (token==PVIRG || token==PCLOSE)
 		{
 			result=true;
 			follow_token=true;
@@ -1912,6 +2002,9 @@ boolean 	_statement_list_aux(){
 boolean 	_empty_statement(){
 	boolean result;
 
+			if (debug) printf ("%s \n ","_empty_statement");
+
+
 		if (token==PVIRG)
 		{
 			result=true;
@@ -1928,6 +2021,7 @@ boolean 	_empty_statement(){
 	statement_expression ';'.*/
 boolean _expression_statement(){
 	boolean result;
+		if (debug) printf ("%s \n ","_expression_statement");
 
 		if (_statement_expression())
 		{
@@ -1960,6 +2054,7 @@ boolean _expression_statement(){
 
 boolean 	_statement_expression(){
 	boolean result;
+		if (debug) printf ("%s \n ","_statement_expression");
 
 		if (_assignment())
 		{
@@ -2371,7 +2466,7 @@ boolean _for_statement(){
 	
 	boolean result = false; 
 	
-	token = _lire_token();
+
 	
 	if(token == FOR){
 		
@@ -2379,7 +2474,8 @@ boolean _for_statement(){
 		
 		if(token == POPEN){
 
-			if(_for_initializer() || !_for_initializer()){
+			token=_lire_token();
+			if(token==PVIRG){
 
 				token = _lire_token();
 
@@ -2530,7 +2626,7 @@ boolean _statement_expression_list_aux(){
 int main(){
 	token=_lire_token();
 
-	if(_while_statement()){
+	if(_statement()){
 		printf("ok\n");
 	}else{
 		printf("nno\n");

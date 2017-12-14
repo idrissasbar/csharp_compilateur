@@ -1134,617 +1134,617 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 21 "analyseur_csharp.l"
-{return PVIRG;}
+{if (debug) printf ("; \n"); return PVIRG;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 22 "analyseur_csharp.l"
-{return NULLCOALESCING;}
+{if (debug) printf ("?? \n");return NULLCOALESCING;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 23 "analyseur_csharp.l"
-{return POINTINTER;}
+{if (debug) printf ("? \n");return POINTINTER;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 24 "analyseur_csharp.l"
-{return DOUBLEDOT;}
+{if (debug) printf (": \n");return DOUBLEDOT;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 25 "analyseur_csharp.l"
-{return VIRG;}
+{if (debug) printf (", \n");return VIRG;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 26 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return DOUBLENUMBER;}
+{if (debug) printf ("%s \n",yytext);	return DOUBLENUMBER;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 27 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return INTNUMBER;}
+{if (debug) printf ("%s \n",yytext);	return INTNUMBER;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 28 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return ABSTRACT;}
+{if (debug) printf ("%s \n",yytext);	return ABSTRACT;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 29 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return AS;}
+{if (debug) printf ("%s \n",yytext);	return AS;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 30 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return BASE;}
+{if (debug) printf ("%s \n",yytext);	return BASE;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 31 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return BOOL;}
+{if (debug) printf ("%s \n",yytext);	return BOOL;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 32 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return BREAK;}
+{if (debug) printf ("%s \n",yytext);	return BREAK;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 33 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return BYTE;}
+{if (debug) printf ("%s \n",yytext);	return BYTE;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 34 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return CASE;}
+{if (debug) printf ("%s \n",yytext);	return CASE;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 35 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return CATCH;}
+{if (debug) printf ("%s \n",yytext);	return CATCH;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 36 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return CHAR;}
+{if (debug) printf ("%s \n",yytext);	return CHAR;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 37 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return CHECKED;}
+{if (debug) printf ("%s \n",yytext);	return CHECKED;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 38 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return CLASS;}
+{if (debug) printf ("%s \n",yytext);	return CLASS;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 39 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return CONST;}
+{if (debug) printf ("%s \n",yytext);	return CONST;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 40 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return CONTINUE;}
+{if (debug) printf ("%s \n",yytext);	return CONTINUE;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 41 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return DECIMAL;}
+{if (debug) printf ("%s \n",yytext);	return DECIMAL;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 42 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return DEFAULT;}	
+{if (debug) printf ("%s \n",yytext);	return DEFAULT;}	
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 43 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return DELEGATE;}
+{if (debug) printf ("%s \n",yytext);	return DELEGATE;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 44 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return DO;}	
+{if (debug) printf ("%s \n",yytext);	return DO;}	
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 45 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return DOUBLE;}
+{if (debug) printf ("%s \n",yytext);	return DOUBLE;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 46 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return ELSE;}
+{if (debug) printf ("%s \n",yytext);	return ELSE;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 47 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return ENUM;}
+{if (debug) printf ("%s \n",yytext);	return ENUM;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 48 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return EVENT;}
+{if (debug) printf ("%s \n",yytext);	return EVENT;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 49 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return EXPLICIT;}
+{if (debug) printf ("%s \n",yytext);	return EXPLICIT;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 50 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return EXTERN;}
+{if (debug) printf ("%s \n",yytext);	return EXTERN;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 51 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return FALSE;}
+{if (debug) printf ("%s \n",yytext);	return FALSE;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 52 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return FINALLY;} 	
+{if (debug) printf ("%s \n",yytext);	return FINALLY;} 	
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 53 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return FIXED;}
+{if (debug) printf ("%s \n",yytext);	return FIXED;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 54 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return FLOAT;}
+{if (debug) printf ("%s \n",yytext);	return FLOAT;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 #line 55 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return FOR;}
+{if (debug) printf ("%s \n",yytext);	return FOR;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 56 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return FOREACH;}
+{if (debug) printf ("%s \n",yytext);	return FOREACH;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 57 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return GOTO;}
+{if (debug) printf ("%s \n",yytext);	return GOTO;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 58 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return IF;}
+{if (debug) printf ("%s \n",yytext);	return IF;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 59 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return IMPLICIT;}
+{if (debug) printf ("%s \n",yytext);	return IMPLICIT;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 60 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return IN;}
+{if (debug) printf ("%s \n",yytext);	return IN;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 61 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return INT;}
+{if (debug) printf ("%s \n",yytext);	return INT;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 #line 62 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return INTERFACE;}
+{if (debug) printf ("%s \n",yytext);	return INTERFACE;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 #line 63 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return INTERNAL;}	
+{if (debug) printf ("%s \n",yytext);	return INTERNAL;}	
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 #line 64 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return IS;}
+{if (debug) printf ("%s \n",yytext);	return IS;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 65 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return LOCK;}
+{if (debug) printf ("%s \n",yytext);	return LOCK;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
 #line 66 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return LONG;}
+{if (debug) printf ("%s \n",yytext);	return LONG;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 67 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return NAMESPACE;}
+{if (debug) printf ("%s \n",yytext);	return NAMESPACE;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 68 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return NEW;} 		
+{if (debug) printf ("%s \n",yytext);	return NEW;} 		
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 69 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return NNULL;}
+{if (debug) printf ("%s \n",yytext);	return NNULL;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 70 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return OBJECT;}
+{if (debug) printf ("%s \n",yytext);	return OBJECT;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 71 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return OPERATOR;}
+{if (debug) printf ("%s \n",yytext);	return OPERATOR;}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
 #line 72 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return OUT;}
+{if (debug) printf ("%s \n",yytext);	return OUT;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 73 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return OVERRIDE;}
+{if (debug) printf ("%s \n",yytext);	return OVERRIDE;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 74 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return PARAMS;}
+{if (debug) printf ("%s \n",yytext);	return PARAMS;}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 75 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return PRIVATE;}
+{if (debug) printf ("%s \n",yytext);	return PRIVATE;}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 76 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return PROTECTED;}
+{if (debug) printf ("%s \n",yytext);	return PROTECTED;}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
 #line 77 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return PUBLIC;}
+{if (debug) printf ("%s \n",yytext);	return PUBLIC;}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 78 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return READONLY;}
+{if (debug) printf ("%s \n",yytext);	return READONLY;}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 79 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return REF;}
+{if (debug) printf ("%s \n",yytext);	return REF;}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
 #line 80 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return RETURN;}	
+{if (debug) printf ("%s \n",yytext);	return RETURN;}	
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
 #line 81 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return SBYTE;}
+{if (debug) printf ("%s \n",yytext);	return SBYTE;}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 82 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return SEALED;}	
+{if (debug) printf ("%s \n",yytext);	return SEALED;}	
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
 #line 83 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return SHORT;}	
+{if (debug) printf ("%s \n",yytext);	return SHORT;}	
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
 #line 84 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return SIZEOF;}
+{if (debug) printf ("%s \n",yytext);	return SIZEOF;}
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
 #line 85 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return STACKALLOC;}
+{if (debug) printf ("%s \n",yytext);	return STACKALLOC;}
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
 #line 86 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return STATIC;}
+{if (debug) printf ("%s \n",yytext);	return STATIC;}
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
 #line 87 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return STRING;}
+{if (debug) printf ("%s \n",yytext);	return STRING;}
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
 #line 88 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return STRUCT;}
+{if (debug) printf ("%s \n",yytext);	return STRUCT;}
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
 #line 89 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return SWITCH;}
+{if (debug) printf ("%s \n",yytext);	return SWITCH;}
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
 #line 90 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return THIS;}
+{if (debug) printf ("%s \n",yytext);	return THIS;}
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
 #line 91 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return THROW;}
+{if (debug) printf ("%s \n",yytext);	return THROW;}
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
 #line 92 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return TRUE;}
+{if (debug) printf ("%s \n",yytext);	return TRUE;}
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
 #line 93 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return TRY;}
+{if (debug) printf ("%s \n",yytext);	return TRY;}
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
 #line 94 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return TYPEOF;}
+{if (debug) printf ("%s \n",yytext);	return TYPEOF;}
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
 #line 95 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return UINT;}
+{if (debug) printf ("%s \n",yytext);	return UINT;}
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
 #line 96 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return ULONG;}
+{if (debug) printf ("%s \n",yytext);	return ULONG;}
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
 #line 97 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return UNCHECKED;}
+{if (debug) printf ("%s \n",yytext);	return UNCHECKED;}
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
 #line 98 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return UNSAFE;}
+{if (debug) printf ("%s \n",yytext);	return UNSAFE;}
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
 #line 99 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return USHORT;}
+{if (debug) printf ("%s \n",yytext);	return USHORT;}
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
 #line 100 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return USING;}
+{if (debug) printf ("%s \n",yytext);	return USING;}
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
 #line 101 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return VIRTUAL;}
+{if (debug) printf ("%s \n",yytext);	return VIRTUAL;}
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
 #line 102 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return VOID;}
+{if (debug) printf ("%s \n",yytext);	return VOID;}
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
 #line 103 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return VOLATILE;}
+{if (debug) printf ("%s \n",yytext);	return VOLATILE;}
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
 #line 104 "analyseur_csharp.l"
-{if (debug) printf ("%s ",yytext);	return WHILE;}
+{if (debug) printf ("%s \n",yytext);	return WHILE;}
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
 #line 105 "analyseur_csharp.l"
-{if (debug) printf ("["); return LEFTBRACKET;}
+{if (debug) printf ("[ \n"); return LEFTBRACKET;}
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
 #line 106 "analyseur_csharp.l"
-{if (debug) printf ("]"); return RIGHTBRACKET;}
+{if (debug) printf ("] \n"); return RIGHTBRACKET;}
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
 #line 107 "analyseur_csharp.l"
-{if (debug) printf ("("); return POPEN;}
+{if (debug) printf ("( \n"); return POPEN;}
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
 #line 108 "analyseur_csharp.l"
-{if (debug) printf (")"); return PCLOSE;}		
+{if (debug) printf (") \n"); return PCLOSE;}		
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
 #line 109 "analyseur_csharp.l"
-{if (debug) printf ("{"); return BOPEN;}
+{if (debug) printf ("{ \n"); return BOPEN;}
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
 #line 110 "analyseur_csharp.l"
-{if (debug) printf ("}"); return BCLOSE;}
+{if (debug) printf ("} \n"); return BCLOSE;}
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
 #line 111 "analyseur_csharp.l"
-{if (debug) printf ("="); return EQ;}
+{if (debug) printf ("= \n"); return EQ;}
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
 #line 112 "analyseur_csharp.l"
-{if (debug) printf ("+"); return PLUS;}
+{if (debug) printf ("+ \n"); return PLUS;}
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
 #line 113 "analyseur_csharp.l"
-{if (debug) printf ("-"); return MINUS;}
+{if (debug) printf ("- \n"); return MINUS;}
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
 #line 114 "analyseur_csharp.l"
-{if (debug) printf ("*"); return MULT;}
+{if (debug) printf ("* \n"); return MULT;}
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
 #line 115 "analyseur_csharp.l"
-{if (debug) printf ("/"); return DIV;}
+{if (debug) printf ("/ \n"); return DIV;}
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
 #line 116 "analyseur_csharp.l"
-{if (debug) printf ("/"); return MOD;}
+{if (debug) printf ("/ \n"); return MOD;}
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
 #line 117 "analyseur_csharp.l"
-{if (debug) printf ("+="); return PLUSEQ; }
+{if (debug) printf ("+= \n"); return PLUSEQ; }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
 #line 118 "analyseur_csharp.l"
-{if (debug) printf ("-="); return MINUSEQ; }
+{if (debug) printf ("-= \n"); return MINUSEQ; }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
 #line 119 "analyseur_csharp.l"
-{ return STAREQ; }
+{if (debug) printf ("*= \n"); return STAREQ; }
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
 #line 120 "analyseur_csharp.l"
-{ return DIVEQ; }
+{if (debug) printf ("/= \n"); return DIVEQ; }
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
 #line 121 "analyseur_csharp.l"
-{ return MODEQ; }
+{if (debug) printf ("MODEQ \n"); return MODEQ; }
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
 #line 122 "analyseur_csharp.l"
-{ return XOR; }
+{if (debug) printf ("^ \n"); return XOR; }
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
 #line 123 "analyseur_csharp.l"
-{ return XOREQ; }
+{if (debug) printf ("^= \n"); return XOREQ; }
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
 #line 124 "analyseur_csharp.l"
-{ return AND; }
+{if (debug) printf ("& \n"); return AND; }
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
 #line 125 "analyseur_csharp.l"
-{ return ANDEQ; }
+{if (debug) printf ("&= \n"); return ANDEQ; }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
 #line 126 "analyseur_csharp.l"
-{ return OR; }
+{if (debug) printf ("| \n"); return OR; }
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
 #line 127 "analyseur_csharp.l"
-{ return OREQ; }
+{if (debug) printf ("|= \n"); return OREQ; }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
 #line 128 "analyseur_csharp.l"
-{ return LT; }
+{if (debug) printf ("< \n"); return LT; }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
 #line 129 "analyseur_csharp.l"
-{ return GT; }
+{if (debug) printf ("> \n"); return GT; }
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
 #line 130 "analyseur_csharp.l"
-{ return LTLT; }
+{if (debug) printf ("<< \n"); return LTLT; }
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
 #line 131 "analyseur_csharp.l"
-{ return GTGT; }
+{if (debug) printf (">> \n"); return GTGT; }
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
 #line 132 "analyseur_csharp.l"
-{ return GTGTEQ; }
+{if (debug) printf (">>= \n"); return GTGTEQ; }
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
 #line 133 "analyseur_csharp.l"
-{ return LTLTEQ; }
+{if (debug) printf ("<<= \n"); return LTLTEQ; }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
 #line 134 "analyseur_csharp.l"
-{ return EQEQ; }
+{if (debug) printf ("== \n"); return EQEQ; }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
 #line 135 "analyseur_csharp.l"
-{ return NOTEQ; }
+{if (debug) printf ("!= \n"); return NOTEQ; }
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
 #line 136 "analyseur_csharp.l"
-{ return LEQ; }
+{if (debug) printf ("<= \n"); return LEQ; }
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
 #line 137 "analyseur_csharp.l"
-{ return GEQ; }
+{if (debug) printf (">= \n"); return GEQ; }
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
 #line 138 "analyseur_csharp.l"
-{ return ANDAND; }
+{if (debug) printf ("&& \n"); return ANDAND; }
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
 #line 139 "analyseur_csharp.l"
-{ return OROR; }
+{if (debug) printf ("|| \n"); return OROR; }
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
 #line 140 "analyseur_csharp.l"
-{ return PLUSPLUS; }
+{if (debug) printf ("++ \n"); return PLUSPLUS; }
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
 #line 141 "analyseur_csharp.l"
-{ return MINUSMINUS; }	
+{if (debug) printf ("-- \n"); return MINUSMINUS; }	
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
 #line 142 "analyseur_csharp.l"
-{if (debug) printf ("/"); return VAR;}		
+{if (debug) printf ("VAR \n"); return VAR;}		
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
 #line 143 "analyseur_csharp.l"
-{if (debug) printf ("identifier");	return IDF;}
+{if (debug) printf ("identifier \n");	return IDF;}
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
