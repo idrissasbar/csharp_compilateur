@@ -2460,50 +2460,261 @@ boolean _do_statement(){
 /* abad mohamed zayd  ________________________________________________________________*/
 
 /*for_statement =
-	'for' '(' [for_initializer] ';' [for_condition] ';' [for_iterator] ')' embedded_statement.*/
+	'for' '(' [for_initializer] ';' [for_condition] ';' [for_iterator] ')' embedded_statement.
+
+	for ( 				; 				; 					) embedded done
+
+	for (     			;  	 			;   for_iterator 	) embedded done
+	for (     			; for_condition ;   				) embedded done
+	for (     			; for_condition ; for_iterator 		) embedded done
+
+
+	for ( for_initial 	;   			;   				) embedded done
+	for ( for_initiize 	; 				; for_iterator 		) embedded done
+	for ( for_initiale 	; for_condition ; 					) embedded done
+	for ( for_initialize; for_cond 		; fot_itira 		) embedded done
+
+
+
+	*/
 
 boolean _for_statement(){
 	
+<<<<<<< HEAD
 	boolean result = false; 
 	
 
+=======
+	boolean result; 
+>>>>>>> master
 	
-	if(token == FOR){
-		
-		token = _lire_token();
-		
-		if(token == POPEN){
+	if (token == FOR){ // Si on trouve FOR 
 
+		token = _lire_token();
+
+<<<<<<< HEAD
 			token=_lire_token();
 			if(token==PVIRG){
+=======
+		if (token == POPEN){ //  FOR ( 
+
+			token = _lire_token();
+
+			if (token == PVIRG){ //  FOR ( ;
 
 				token = _lire_token();
 
-				if(token == PVIRG){
+				if (token == PVIRG){ //  FOR ( ; ; 
 
-					if(_for_condition() || !_for_condition()){
+					token = _lire_token();
+
+					if (token == PCLOSE){ //  FOR ( ; ; )
 
 						token = _lire_token();
 
-						if(token == PVIRG){
+						if(_embedded_statement()){ //  FOR ( ; ; ) embedded_statement -----------------------
+							result = true;
+						}
+						else{
+							result = false;
+						}
+					}
 
-							if(_for_iterator() || !_for_iterator()){
+					else if (_for_iterator()){ // FOR ( ; ; for_iterator 
 
-								token = _lire_token();
+						token = _lire_token();
 
-								if(token == PCLOSE){
+						if(token == PCLOSE){ // FOR ( ; ; for_iterator ) 
 
-									if(_embedded_statement()){
+							token = _lire_token();
 
-										result = true;
-									}
-								}
+							if(_embedded_statement()){ // FOR ( ; ; for_iterator ) embedded_statement ------------------ 
+							result = true;
+							}
+							else{
+								result = false;
 							}
 						}
 					}
+
+					else{
+						result = false;
+					}
+				}
+
+				else if (_for_condition()){  // FOR ( ; FOR_CONDITION 
+
+					token = _lire_token();
+
+					if (token == PVIRG){ // FOR ( ; FOR_CONDITION ;
+
+						token = _lire_token();
+
+						if (token == PCLOSE){ //  FOR ( ; FOR_CONDITION ; )
+
+							token = _lire_token();
+
+							if(_embedded_statement()){ // FOR ( ; FOR_CONDITION ; ) embeddedd_statement --------------
+								result = true;
+							}
+							else{
+								result = false;
+							}
+						}
+
+						else if(_for_iterator()){//  FOR ( ; FOR_CONDITION ; FOR_ITERATOR
+
+							token = _lire_token();
+
+							if (token == PCLOSE){ //  FOR ( ; FOR_CONDITION ; FOR_ITERATOR ) 
+
+								token = _lire_token();
+
+								if(_embedded_statement()){ // FOR ( ; FOR_CONDITION ; FOR_ITERATOR ) embedded_statement ----------------
+									result = true; 
+								}
+								else{
+									result = false;
+								}
+							}
+							else{
+								result = false;
+							}
+						}
+
+						else{
+							result = false;
+						}
+					}
+					else{
+						result = false;
+					}
+				} 
+
+				else{
+					result = false;
 				}
 			}
+
+			else if (_for_initializer()) {  // FOR ( FOR_initializer 
+>>>>>>> master
+
+				token = _lire_token();
+
+				if (token == PVIRG){   //  FOR ( FOR_initializer ; 
+
+					token = _lire_token();
+
+					if (token == PVIRG){ //  FOR ( FOR_initializer ; ;
+
+						token = _lire_token();
+
+						if (token == PCLOSE){ //  FOR ( FOR_initializer ; ; ) 
+
+							token = _lire_token();
+
+							if(_embedded_statement()){ //  FOR ( FOR_initializer ; ; ) embedded_statement ----------------
+								result = true;
+							}
+							else{
+								result = false;
+							}
+						}
+
+						else if (_for_iterator()){ // FOR ( FOR_initializer ; ; FOR_ITERATOR 
+
+							token = _lire_token();
+
+							if(token == PCLOSE){ //  FOR ( FOR_initializer ; ; FOR_ITERATOR  ) 
+
+								token = _lire_token();
+
+								if(_embedded_statement()){ //  FOR ( FOR_initializer ; ; FOR_ITERATOR ) embedded_statement -----------------------
+								result = true;
+								}
+								else{
+									result = false;
+								}
+							}
+						}
+
+						else{
+							result = false;
+						}
+
+					}
+
+					else if (_for_condition()){  // FOR ( FOR_initializer ; FOR_CONDITION
+
+						token = _lire_token();
+
+						if (token == PVIRG){  // FOR ( FOR_initializer ; FOR_CONDITION ; 
+
+							token = _lire_token();
+
+							if (token == PCLOSE){  // FOR ( FOR_initializer ; FOR_CONDITION ; ) 
+
+								token = _lire_token();
+
+								if(_embedded_statement()){  // FOR ( FOR_initializer ; FOR_CONDITION ; ) embedded_statement ----------------------
+									result = true;
+								}
+								else{
+									result = false;
+								}
+							}
+
+							else if(_for_iterator()){  // FOR ( FOR_initializer ; FOR_CONDITION ; FOR_IETRATOR 
+
+								token = _lire_token();
+
+								if (token == PCLOSE){ // FOR ( FOR_initializer ; FOR_CONDITION ; FOR_IETRATOR )
+
+									token = _lire_token();
+
+									if(_embedded_statement()){ // FOR ( FOR_initializer ; FOR_CONDITION ; FOR_IETRATOR ) embedded_statemnt --------------------
+										result = true;
+									}
+									else{
+										result = false;
+									}
+								}
+								else{
+									result = false;
+								}
+							}
+
+							else{
+								result = false;
+							}
+						}
+						else{
+							result = false;
+						}  
+					} 
+
+					else{
+						result = false;
+					}
+				}
+				else{
+					result = false;
+				}
+			}
+
+			else{
+				result = false;
+			}
 		}
+
+		else{
+			result = false;
+		}
+
+	}
+
+	else{
+		result=false;
 	}
 
 	return result; 
@@ -2593,11 +2804,10 @@ boolean _statement_expression_list(){
 	return result; 
 }
 
+
 boolean _statement_expression_list_aux(){
 
 	boolean result = false; 
-
-	token  = _lire_token();
 
 	if(_statement_expression()){
 
