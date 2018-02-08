@@ -2139,37 +2139,22 @@ boolean _selection_statement(listinstvalueType ** pplistinstattribute){
 }
 
 
-/*if_statement =
-	'if' '(' boolean_expression ')' embedded_statement
-	 | 'if' '(' boolean_expression ')' embedded_statement 'else' embedded_statement.*/
-
-boolean _if_statement(listinstvalueType ** pplistinstattribute){
+/*if_statement  = 'if' '(' boolean_expression ')' embedded_statement if_statement_aux
+ */
+boolean _if_statement(){
 	boolean result;
-
-	AST *past = (AST *) malloc(sizeof(AST)); // NEW
-	(*past) = (AST) malloc(sizeof(struct Exp));
-
-	listinstvalueType ** pplistif = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
-	listinstvalueType ** pplistelse = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
-	
 	if(token==IF){
 		token=_lire_token();
 		if(token==POPEN){
 			token=_lire_token();
-			if(_boolean_expression(past)){
+			if(_boolean_expression()){
 				token=_lire_token();
 				if(token==PCLOSE){
 					token=_lire_token();
-					if(_embedded_statement(pplistif)){
-						result=true;
+					if(_embedded_statement()){
 						token=_lire_token();
-						if(token==ELSE){
-							token=_lire_token();
-							if(_embedded_statement(pplistelse)){
-								result=true;
-							}else{
-								result=false;
-							}
+						if(_if_statement_aux()){
+							result=true;
 						}else{
 							result=false;
 						}
@@ -2191,6 +2176,23 @@ boolean _if_statement(listinstvalueType ** pplistinstattribute){
 
 	return result;
 }
+
+/*if_statement_aux= 'else' embedded_statement | epsilon*/
+boolean _if_statement_aux(){
+	boolean result;
+	if(token==ELSE){
+		token=_lire_token();
+		if(_embedded_statement()){
+		 	result=true;	
+		}else{
+			result=false;
+		}
+	}else{
+		result=true;
+	}
+	return result;
+}
+
 /*switch_statement =
 	'switch' '(' expression ')' switch_block.*/
 
