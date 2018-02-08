@@ -3,12 +3,15 @@
 #include<stdlib.h>
 #include<string.h>
 #include"analyseur_csharp.h"
+#include"types.h"
+#include"error.h"
 
 extern boolean debug;
 
 extern int yylex();
-extern int yylineno;
+extern int yylindeno;
 extern char *yytext;
+
 
 
 typetoken token;
@@ -16,6 +19,16 @@ typetoken token;
 //varvalueType var;
 
 boolean follow_token=false;
+
+varvalueType varattribute;
+constvalueType constattribute;
+typevalueType typeattribute;
+instvalueType instattribute;
+listinstvalueType listinstattribute;
+tokenvalueType tokenattribute;
+
+int rangvar;
+boolean semanticerror = false;
 
 typetoken _lire_token(){
 
@@ -26,6 +39,23 @@ typetoken _lire_token(){
 	}else{
 	return (typetoken) yylex();
 	}
+}
+
+
+void set_idf_attributes(char *name, int line){
+	if (debug) printf("[%s]", name);
+	varattribute.name = (char *)malloc(sizeof(char) * strlen(name)+1);
+	strcpy(varattribute.name, name);
+	if (debug) printf("[%s]", varattribute.name);
+	varattribute.line = line;
+}
+
+void set_number_attributes(double value){
+	constattribute.valinit = value;
+}
+
+void set_token_attributes(int line){
+	tokenattribute.line = line;
 }
 
 /*
@@ -456,10 +486,10 @@ local_variable_initializer =
 	 | array_initializer
 	 | local_variable_initializer_unsafe.*/
 
-boolean _local_variable_initializer(){
+boolean _local_variable_initializer(listinstvalueType ** pplistinstattribute){
 	boolean result;
 if (debug) printf ("%s \n ","_local_variable_initializer");
-	if (_expression())	
+	if (_expression(pplistinstattribute))	
 	{
 		result=true;
 	}else{
@@ -475,15 +505,15 @@ if (debug) printf ("%s \n ","FIN _local_variable_initializer");
 expression =
 	non_assignment_expression
 	 | assignment;*/
-boolean _expression(){
+boolean _expression(AST *past){
 	boolean result;
 if (debug) printf ("%s \n ","_expression");
-	if (_non_assignment_expression())
+	if (_non_assignment_expression(past))
 	{
 		result=true;
 	}else{
 
-		if (_assignment())
+		if (_assignment(past))
 		{
 			result=true;
 		}else{
@@ -503,7 +533,7 @@ assignment =
 	unary_expression, assignment_operator, expression;
 */
 
-boolean _assignment(){
+boolean _assignment(AST *past){
 	boolean result;
 if (debug) printf ("%s \n ","_assignment");
 
@@ -513,7 +543,7 @@ if (debug) printf ("%s \n ","_assignment");
 		if (_assignment_operator())
 		{
 			token=_lire_token();
-			if (_expression())
+			if (_expression(past))
 			{
 				result=true;
 			}else{
@@ -734,7 +764,7 @@ boolean 	_simple_name(){
 	'(' expression ')'. */
 
 
-boolean 	_parenthesized_expression(){
+boolean 	_parenthesized_expression(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_parenthesized_expression");
@@ -744,7 +774,7 @@ boolean 	_parenthesized_expression(){
 	{
 		token=_lire_token();
 
-		if (_expression())
+		if (_expression(past))
 		{
 			token=_lire_token();
 
@@ -778,13 +808,14 @@ non_assignment_expression =
 	 | lambda_expression
 	 | query_expression.*/
 
-boolean _non_assignment_expression(){
+boolean _non_assignment_expression(AST *past){
 	boolean result;
 
+	
 		if (debug) printf ("%s \n ","non_assignment_expression");
 
 
-		if (_conditional_expression())
+		if (_conditional_expression(past))
 		{
 			result=true;
 		}else{
@@ -804,17 +835,17 @@ boolean _non_assignment_expression(){
 
 /*multiplicative_expression = unary_expression  multiplicative_expression_aux*/
 
-boolean 	_multiplicative_expression(){
+boolean 	_multiplicative_expression(AST *past){
 	boolean result;
 
 
 			if (debug) printf ("%s \n ","_multiplicative_expression");
 
 
-		if (_unary_expression())
+		if (_unary_expression(past))
 		{
 			token=_lire_token();
-			if (_multiplicative_expression_aux())
+			if (_multiplicative_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -835,7 +866,7 @@ boolean 	_multiplicative_expression(){
 							|'%' unary_expression multiplicative_expression_aux
 							|eps*/
 
-boolean _multiplicative_expression_aux(){
+boolean _multiplicative_expression_aux(AST *past){
 	boolean result;
 
 	//unsigned int follow[]={PVIRG,PCLOSE,VIRG,LT,GT,LEQ,GEQ};
@@ -844,7 +875,7 @@ boolean _multiplicative_expression_aux(){
 
 
 
-		if (token==PVIRG || token==PCLOSE || token==VIRG || token==LT || token==GT || token==NOTEQ)
+		if (token==PLUS ||token==MINUS||token==EQ || token==PVIRG || token==PCLOSE || token==VIRG || token==LT || token==GT || token==NOTEQ)
 		{
 			result=true;
 			follow_token=true;
@@ -854,7 +885,7 @@ boolean _multiplicative_expression_aux(){
 			{
 				token=_lire_token();
 
-				if (_multiplicative_expression())
+				if (_multiplicative_expression(past))
 				{
 					result=true;
 				}else{
@@ -867,7 +898,7 @@ boolean _multiplicative_expression_aux(){
 						{
 							token=_lire_token();
 
-								if (_multiplicative_expression())
+								if (_multiplicative_expression(past))
 								{
 									result=true;
 								}else{
@@ -879,7 +910,7 @@ boolean _multiplicative_expression_aux(){
 								{
 									token=_lire_token();
 
-									if (_multiplicative_expression())
+									if (_multiplicative_expression(past))
 									{
 											result=true;
 									}else{
@@ -908,16 +939,16 @@ boolean _multiplicative_expression_aux(){
 /* additive_expression = multiplicative_expression additive_expression_aux*/
 
 
-boolean 	_additive_expression(){
+boolean 	_additive_expression(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_additive_expression");
 
-		if (_multiplicative_expression())
+		if (_multiplicative_expression(past))
 		{
 			token=_lire_token();
 
-			if (_additive_expression_aux())
+			if (_additive_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -937,13 +968,13 @@ boolean 	_additive_expression(){
 						|'-' multiplicative_expression additive_expression_aux
 						|eps*/
 
-boolean 	 _additive_expression_aux(){
+boolean 	 _additive_expression_aux(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_additive_expression_aux");
 
 
-		if (token==PVIRG || token==PCLOSE || token==VIRG || token==LT)
+		if (token==PVIRG||token==EQ  || token==PCLOSE || token==VIRG || token==LT)
 		{
 			result=true;
 			follow_token=true;
@@ -953,7 +984,7 @@ boolean 	 _additive_expression_aux(){
 			{
 				token=_lire_token();
 
-					if (_additive_expression())
+					if (_additive_expression(past))
 					{
 						result=true;
 					}else{
@@ -965,7 +996,7 @@ boolean 	 _additive_expression_aux(){
 					{
 						token=_lire_token();
 
-						if (_additive_expression())
+						if (_additive_expression(past))
 						{
 								result=true;
 						}else{
@@ -992,17 +1023,17 @@ boolean 	 _additive_expression_aux(){
 /*shift_expression = additive_expression shift_expression_aux */
 
 
-boolean 	_shift_expression(){
+boolean 	_shift_expression(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_shift_expression");
 
 
-		if (_additive_expression())
+		if (_additive_expression(past))
 		{
 			token=_lire_token();
 
-			if (_shift_expression_aux())
+			if (_shift_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1023,13 +1054,13 @@ boolean 	_shift_expression(){
 					'>>' additive_expression shift_expression_aux
 					|eps*/
 
-boolean _shift_expression_aux(){
+boolean _shift_expression_aux(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_shift_expression_aux");
 
 
-		if (token==PVIRG || token==PCLOSE || token==VIRG || token==LT)
+		if (token==PVIRG ||token==EQ|| token==PCLOSE || token==VIRG || token==LT)
 		{
 			result=true;
 			follow_token=true;
@@ -1039,7 +1070,7 @@ boolean _shift_expression_aux(){
 			{
 				token=_lire_token();
 
-					if (_shift_expression())
+					if (_shift_expression(past))
 					{
 						result=true;
 					}else{
@@ -1051,7 +1082,7 @@ boolean _shift_expression_aux(){
 					{
 						token=_lire_token();
 
-						if (_shift_expression())
+						if (_shift_expression(past))
 						{
 								result=true;
 						}else{
@@ -1084,17 +1115,17 @@ boolean _shift_expression_aux(){
 							  shift_expression relational_expression_aux
 							| type relational_expression_aux_aux*/
 
-boolean 	_relational_expression(){
+boolean 	_relational_expression(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_relational_expression");
 
 
-		if (_shift_expression())
+		if (_shift_expression(past))
 		{
 			token=_lire_token();
 
-			if (_relational_expression_aux())
+			if (_relational_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1107,7 +1138,7 @@ boolean 	_relational_expression(){
 				
 				token=_lire_token();
 
-				if (_relational_expression_aux_aux())
+				if (_relational_expression_aux_aux(past))
 				{
 					result=true;
 				}else{
@@ -1130,7 +1161,7 @@ boolean 	_relational_expression(){
 					 	|  '>=' shift_expression relational_expression_aux
 					 	| eps */
 
-boolean 	_relational_expression_aux(){
+boolean 	_relational_expression_aux(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_relational_expression_aux");
@@ -1146,7 +1177,7 @@ boolean 	_relational_expression_aux(){
 		{
 			token=_lire_token();
 
-			if (_relational_expression())
+			if (_relational_expression(past))
 			{
 				result=true;
 			}else{
@@ -1159,7 +1190,7 @@ boolean 	_relational_expression_aux(){
 			{
 				token=_lire_token();
 
-				if (_relational_expression())
+				if (_relational_expression(past))
 				{
 					result=true;
 				}else{
@@ -1173,7 +1204,7 @@ boolean 	_relational_expression_aux(){
 				{
 					token=_lire_token();
 
-					if (_relational_expression())
+					if (_relational_expression(past))
 					{
 						result=true;
 					}else{
@@ -1186,7 +1217,7 @@ boolean 	_relational_expression_aux(){
 							{
 								token=_lire_token();
 
-								if (_relational_expression())
+								if (_relational_expression(past))
 								{
 									result=true;
 								}else{
@@ -1210,7 +1241,7 @@ boolean 	_relational_expression_aux(){
 						 		|  'as' type relational_expression_aux_aux
 						 		| eps */
 
-boolean 	_relational_expression_aux_aux(){
+boolean 	_relational_expression_aux_aux(AST *past){
 	boolean result;
 
 
@@ -1226,17 +1257,17 @@ boolean 	_relational_expression_aux_aux(){
 
 /* equality_expression = relational_expression equality_expression_aux */
 
-boolean 	_equality_expression(){
+boolean 	_equality_expression(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_equality_expression");
 
 
-		if (_relational_expression())
+		if (_relational_expression(past))
 		{
 			token=_lire_token();
 
-			if (_equality_expression_aux())
+			if (_equality_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1256,7 +1287,7 @@ boolean 	_equality_expression(){
 							|  '!=' relational_expression equality_expression_aux
 							| eps */
 
-boolean 	_equality_expression_aux(){
+boolean 	_equality_expression_aux(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_equality_expression_aux");
@@ -1272,7 +1303,7 @@ boolean 	_equality_expression_aux(){
 			{
 				token=_lire_token();
 
-				if (_equality_expression())
+				if (_equality_expression(past))
 				{
 					result=true;
 				}else{
@@ -1284,7 +1315,7 @@ boolean 	_equality_expression_aux(){
 				{
 					token=_lire_token();
 
-					if (_equality_expression())
+					if (_equality_expression(past))
 					{
 						result=true;
 					}else{
@@ -1307,16 +1338,16 @@ boolean 	_equality_expression_aux(){
 
 /*	and_expression = equality_expression and_expression_aux */
 
-boolean 	_and_expression(){
+boolean 	_and_expression(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_and_expression");
 
-		if (_equality_expression())
+		if (_equality_expression(past))
 		{
 			token=_lire_token();
 
-			if (_and_expression_aux())
+			if (_and_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1335,7 +1366,7 @@ boolean 	_and_expression(){
 						'&'	equality_expression and_expression_aux
 						| eps */
 
-boolean 	_and_expression_aux(){
+boolean 	_and_expression_aux(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_and_expression_aux");
@@ -1351,7 +1382,7 @@ boolean 	_and_expression_aux(){
 			{
 				token=_lire_token();
 
-				if (_and_expression())
+				if (_and_expression(past))
 				{
 					result=true;
 				}else{
@@ -1374,16 +1405,16 @@ boolean 	_and_expression_aux(){
 /* exclusive_or_expression = and_expression exclusive_or_expression_aux */
 
 
-boolean 	_exclusive_or_expression(){
+boolean 	_exclusive_or_expression(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_exclusive_or_expression");
 
-		if (_and_expression())
+		if (_and_expression(past))
 		{
 			token=_lire_token();
 
-			if (_exclusive_or_expression_aux())
+			if (_exclusive_or_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1401,7 +1432,7 @@ boolean 	_exclusive_or_expression(){
 /* exclusive_or_expression_aux =
 								'^' and_expression exclusive_or_expression_aux
 								| eps */
-boolean 	_exclusive_or_expression_aux(){
+boolean 	_exclusive_or_expression_aux(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","exclusive_or_expression_aux");
@@ -1416,7 +1447,7 @@ boolean 	_exclusive_or_expression_aux(){
 			{
 				token=_lire_token();
 
-				if (_exclusive_or_expression())
+				if (_exclusive_or_expression(past))
 				{
 					result=true;
 				}else{
@@ -1440,17 +1471,17 @@ boolean 	_exclusive_or_expression_aux(){
 
 /*	inclusive_or_expression = exclusive_or_expression inclusive_or_expression_aux */
 
-boolean 	_inclusive_or_expression(){
+boolean 	_inclusive_or_expression(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_inclusive_or_expression");
 
 
-		if (_exclusive_or_expression())
+		if (_exclusive_or_expression(past))
 		{
 			token=_lire_token();
 
-			if (_inclusive_or_expression_aux())
+			if (_inclusive_or_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1469,7 +1500,7 @@ boolean 	_inclusive_or_expression(){
 								'|' exclusive_or_expression inclusive_or_expression_aux
 								| eps */
 
-boolean 	_inclusive_or_expression_aux(){
+boolean 	_inclusive_or_expression_aux(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_inclusive_or_expression_aux");
@@ -1485,7 +1516,7 @@ boolean 	_inclusive_or_expression_aux(){
 			{
 				token=_lire_token();
 
-				if (_inclusive_or_expression())
+				if (_inclusive_or_expression(past))
 				{
 					result=true;
 				}else{
@@ -1507,15 +1538,15 @@ boolean 	_inclusive_or_expression_aux(){
 
 /* conditional_and_expression = inclusive_or_expression conditional_and_expression_aux */
 
-boolean 	_conditional_and_expression(){
+boolean 	_conditional_and_expression(AST *past){
 	boolean result;
 		if (debug) printf ("%s \n ","_conditional_and_expression");
 
-		if (_inclusive_or_expression())
+		if (_inclusive_or_expression(past))
 		{
 			token=_lire_token();
 
-			if (_conditional_and_expression_aux())
+			if (_conditional_and_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1533,7 +1564,7 @@ boolean 	_conditional_and_expression(){
 									'&&' inclusive_or_expression conditional_and_expression_aux
 									| eps */
 
-boolean 	_conditional_and_expression_aux(){
+boolean 	_conditional_and_expression_aux(AST *past){
 	boolean result;
 		if (debug) printf ("%s \n ","_conditional_and_expression_aux");
 
@@ -1547,7 +1578,7 @@ boolean 	_conditional_and_expression_aux(){
 				{
 					token=_lire_token();
 
-					if (_conditional_and_expression())
+					if (_conditional_and_expression(past))
 					{
 						result=true;
 					}else{
@@ -1568,16 +1599,16 @@ boolean 	_conditional_and_expression_aux(){
 
 /*conditional_expression = null_coalescing_expression conditional_expression_aux*/
 
-boolean 	_conditional_expression(){
+boolean 	_conditional_expression(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_conditional_expression");
 
 
-	 	if (_null_coalescing_expression())
+	 	if (_null_coalescing_expression(past))
 	 	{
 	 		token=_lire_token();
-	 		if (_conditional_expression_aux())
+	 		if (_conditional_expression_aux(past))
 	 		{
 	 			result=true;
 	 		}else{
@@ -1594,7 +1625,7 @@ boolean 	_conditional_expression(){
 
 /*conditional_expression_aux='?' expression ':' expression | eps */
 
-boolean _conditional_expression_aux(){
+boolean _conditional_expression_aux(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_conditional_expression_aux");
@@ -1608,13 +1639,13 @@ boolean _conditional_expression_aux(){
 	{
 		token=_lire_token();
 
-		if (_expression())
+		if (_expression(past))
 		{
 			token=_lire_token();
 			if (token==DOUBLEDOT)
 			{
 				token=_lire_token();
-				if (_expression())
+				if (_expression(past))
 				{
 					result=true;
 				}else{
@@ -1642,15 +1673,15 @@ boolean _conditional_expression_aux(){
 
 /*null_coalescing_expression  = conditional_or_expression null_coalescing_expression_aux*/
 
-boolean 	_null_coalescing_expression(){
+boolean 	_null_coalescing_expression(AST *past){
 	boolean result;
 
 		if (debug) printf ("%s \n ","_null_coalescing_expression");
 
-	if (_conditional_or_expression())
+	if (_conditional_or_expression(past))
 	{
 		token=_lire_token();
-		if (_null_coalescing_expression_aux())
+		if (_null_coalescing_expression_aux(past))
 		{
 			result=true;
 		}else{
@@ -1671,7 +1702,7 @@ boolean 	_null_coalescing_expression(){
 /*null_coalescing_expression_aux= '??' null_coalescing_expression | eps.*/
 
 
-boolean _null_coalescing_expression_aux(){
+boolean _null_coalescing_expression_aux(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_null_coalescing_expression_aux");
@@ -1686,7 +1717,7 @@ boolean _null_coalescing_expression_aux(){
 		if (token==NULLCOALESCING)
 		{
 			token=_lire_token();
-			if (_null_coalescing_expression())
+			if (_null_coalescing_expression(past))
 				{
 					result=true;
 				}else{
@@ -1712,16 +1743,16 @@ boolean _null_coalescing_expression_aux(){
 
 /*conditional_or_expression = conditional_and_expression conditional_or_expression_aux.*/
 
-boolean 	_conditional_or_expression(){
+boolean 	_conditional_or_expression(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_conditional_or_expression");
 
 
-		if (_conditional_and_expression())
+		if (_conditional_and_expression(past))
 		{
 			token=_lire_token();
-			if (_conditional_or_expression_aux())
+			if (_conditional_or_expression_aux(past))
 			{
 				result=true;
 			}else{
@@ -1741,7 +1772,7 @@ boolean 	_conditional_or_expression(){
 								'||' conditional_and_expression conditional_or_expression_aux 
 								| eps .*/
 
-boolean 	_conditional_or_expression_aux(){
+boolean 	_conditional_or_expression_aux(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_conditional_or_expression_aux");
@@ -1758,7 +1789,7 @@ boolean 	_conditional_or_expression_aux(){
 			{
 				token=_lire_token();
 
-				if (_conditional_or_expression())
+				if (_conditional_or_expression(past))
 				{
 					result=true;
 				}else{
@@ -1777,13 +1808,13 @@ boolean 	_conditional_or_expression_aux(){
 /*constant_expression =
 	expression.*/
 
-boolean _constant_expression(){
+boolean _constant_expression(AST *past){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_constant_expression");
 
 
-	if (_expression())
+	if (_expression(past))
 	{
 		result=true;
 	}else{
@@ -1798,11 +1829,11 @@ boolean _constant_expression(){
 	expression.
 */
 
-boolean _boolean_expression(){
+boolean _boolean_expression(AST  *past){
 	boolean result;
 		if (debug) printf ("%s \n ","_boolean_expression");
 
-	if (_expression())
+	if (_expression(past))
 	{
 		result=true;
 	}else{
@@ -1818,7 +1849,7 @@ boolean _boolean_expression(){
 	 | declaration_statement
 	 | embedded_statement.*/
 
-boolean _statement(){
+boolean _statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_statement");
@@ -1827,7 +1858,7 @@ boolean _statement(){
 		{
 			result=true;
 		}else{
-			if (_embedded_statement())
+			if (_embedded_statement(pplistinstattribute))
 			{
 				result=true;
 			}else{
@@ -1857,33 +1888,33 @@ boolean _statement(){
 	 | embedded_statement_unsafe.*/
 
 
-boolean _embedded_statement(){
+boolean _embedded_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_embedded_statement");
 
 
-		if (_block())
+		if (_block(pplistinstattribute))
 		{
 			result=true;
 		}else{
 
-			if (_empty_statement())
+			if (_empty_statement(pplistinstattribute))
 			{
 				result=true;
 			}else{
 
-				if (_expression_statement())
+				if (_expression_statement(pplistinstattribute))
 				{
 					result=true;
 				}else{
 						
-					if (_selection_statement())
+					if (_selection_statement(pplistinstattribute))
 					{
 						result=true;
 					}else{
 						
-						if (_iteration_statement())
+						if (_iteration_statement(pplistinstattribute))
 						{
 							result=true;
 						}else{
@@ -1911,7 +1942,7 @@ boolean _embedded_statement(){
 /*  block = '{''}'
 			| '{' [statement_list] '}'*/
 
-boolean _block(){
+boolean _block(listinstvalueType ** pplistinstattribute){
 	boolean result;
 		if (debug) printf ("%s \n ","_block");
 
@@ -1927,7 +1958,7 @@ boolean _block(){
 			}else{
 
 		if (debug) printf ("%s \n ","debut5555 _block");
-				if (_statement_list())
+				if (_statement_list(pplistinstattribute))
 					{
 						token=_lire_token();
 
@@ -1956,17 +1987,17 @@ boolean _block(){
 
 /* statement_list = statement statement_list_aux */
 
-boolean 	_statement_list(){
+boolean 	_statement_list(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_statement_list");
 
 
-		if (_statement())
+		if (_statement(pplistinstattribute))
 		{
 			token=_lire_token();
 
-			if (_statement_list_aux())
+			if (_statement_list_aux(pplistinstattribute))
 			{
 				result=true;
 			}else{
@@ -1987,7 +2018,7 @@ boolean 	_statement_list(){
 						statement statement_list_aux
 						| eps */
 
-boolean 	_statement_list_aux(){
+boolean 	_statement_list_aux(listinstvalueType ** pplistinstattribute){
 	boolean result;
 		if (debug) printf ("%s 	\n ","_statement_list_aux");
 
@@ -1997,7 +2028,7 @@ boolean 	_statement_list_aux(){
 			follow_token=true;
 		}else{
 
-			if (_statement_list())
+			if (_statement_list(pplistinstattribute))
 			{
 				result=true;
 			}else{
@@ -2012,7 +2043,7 @@ boolean 	_statement_list_aux(){
 
 /*empty_statement = ';'.*/
 
-boolean 	_empty_statement(){
+boolean 	_empty_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
 			if (debug) printf ("%s \n ","_empty_statement");
@@ -2032,11 +2063,11 @@ boolean 	_empty_statement(){
 
 /*expression_statement =
 	statement_expression ';'.*/
-boolean _expression_statement(){
+boolean _expression_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 		if (debug) printf ("%s \n ","_expression_statement");
 
-		if (_statement_expression())
+		if (_statement_expression(pplistinstattribute))
 		{
 			token=_lire_token();
 
@@ -2065,11 +2096,15 @@ boolean _expression_statement(){
 	 | pre_decrement_expression.*/
 
 
-boolean 	_statement_expression(){
+boolean 	_statement_expression(listinstvalueType ** pplistinstattribute){
 	boolean result;
+
+	AST *past = (AST *) malloc(sizeof(AST)); // NEW
+	(*past) = (AST) malloc(sizeof(struct Exp));
+
 		if (debug) printf ("%s \n ","_statement_expression");
 
-		if (_assignment())
+		if (_assignment(past))
 		{
 			result=true;
 
@@ -2088,12 +2123,13 @@ boolean 	_statement_expression(){
 	if_statement
 	 | switch_statement.*/
 
-boolean _selection_statement(){
+boolean _selection_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
-	if(_if_statement()){
+
+	if(_if_statement(pplistinstattribute)){
 		result=true;
 	}else{
-		if(_switch_statement()){
+		if(_switch_statement(pplistinstattribute)){
 			result=true;
 		}else{
 			result=false;
@@ -2103,22 +2139,37 @@ boolean _selection_statement(){
 }
 
 
-/*if_statement  = 'if' '(' boolean_expression ')' embedded_statement if_statement_aux
- */
-boolean _if_statement(){
+/*if_statement =
+	'if' '(' boolean_expression ')' embedded_statement
+	 | 'if' '(' boolean_expression ')' embedded_statement 'else' embedded_statement.*/
+
+boolean _if_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
+
+	AST *past = (AST *) malloc(sizeof(AST)); // NEW
+	(*past) = (AST) malloc(sizeof(struct Exp));
+
+	listinstvalueType ** pplistif = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
+	listinstvalueType ** pplistelse = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
+	
 	if(token==IF){
 		token=_lire_token();
 		if(token==POPEN){
 			token=_lire_token();
-			if(_boolean_expression()){
+			if(_boolean_expression(past)){
 				token=_lire_token();
 				if(token==PCLOSE){
 					token=_lire_token();
-					if(_embedded_statement()){
+					if(_embedded_statement(pplistif)){
+						result=true;
 						token=_lire_token();
-						if(_if_statement_aux()){
-							result=true;
+						if(token==ELSE){
+							token=_lire_token();
+							if(_embedded_statement(pplistelse)){
+								result=true;
+							}else{
+								result=false;
+							}
 						}else{
 							result=false;
 						}
@@ -2140,28 +2191,14 @@ boolean _if_statement(){
 
 	return result;
 }
-
-/*if_statement_aux= 'else' embedded_statement | epsilon*/
-boolean _if_statement_aux(){
-	boolean result;
-	if(token==ELSE){
-		token=_lire_token();
-		if(_embedded_statement()){
-		 	result=true;	
-		}else{
-			result=false;
-		}
-	}else{
-		result=true;
-	}
-	return result;
-}
-
 /*switch_statement =
 	'switch' '(' expression ')' switch_block.*/
 
-boolean _switch_statement(){
+boolean _switch_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
+
+	AST *past = (AST *) malloc(sizeof(AST)); // NEW
+	(*past) = (AST) malloc(sizeof(struct Exp));
 
 	if(token==SWITCH){
 		token=_lire_token();
@@ -2169,13 +2206,13 @@ boolean _switch_statement(){
 		if(token==POPEN){
 			token=_lire_token();
 
-			if(_expression()){
+			if(_expression(past)){
 				token=_lire_token();
 
 				if(token==PCLOSE){
 					token=_lire_token();
 
-					if(_switch_block()){
+					if(_switch_block(pplistinstattribute)){
 						result=true;
 					}else{
 						result=false;
@@ -2199,11 +2236,15 @@ boolean _switch_statement(){
 /*switch_block =
 	'{' [switch_sections] '}'.*/
 
-boolean _switch_block(){
+boolean _switch_block(listinstvalueType ** pplistinstattribute){
 	boolean result;
 	if(token==BOPEN){
 		token=_lire_token();
-		if(_switch_sections() || !_switch_sections()){
+		if (token==BCLOSE)
+		{
+			result=true;
+		}else{
+		if(_switch_sections(pplistinstattribute)){
 			token=_lire_token();
 			if(token==BCLOSE){
 				result=true;
@@ -2212,6 +2253,7 @@ boolean _switch_block(){
 			}
 		}else{
 			result=false;
+			}
 		}
 	}else{
 		result=false;
@@ -2226,11 +2268,11 @@ boolean _switch_block(){
 
 /*switch_sections = switch_section switch_sections_aux.*/
 
-boolean _switch_sections(){
+boolean _switch_sections(listinstvalueType ** pplistinstattribute){
 	boolean result;
-	if(_switch_section()){
+	if(_switch_section(pplistinstattribute)){
 		token=_lire_token();
-		if(_switch_sections_aux()){
+		if(_switch_sections_aux(pplistinstattribute)){
 			result=true;
 		}else{
 			result=false;
@@ -2244,19 +2286,16 @@ boolean _switch_sections(){
 
 /*switch_sections_aux = switch_section switch_sections_aux | eps */
 	
-boolean _switch_sections_aux(){
+boolean _switch_sections_aux(listinstvalueType ** pplistinstattribute){
 	boolean result;
 	if(token==BCLOSE){
 		result=true;
 		follow_token=true;
 	}else{
-		if(_switch_section()){
-			token=_lire_token();
-			if(_switch_sections_aux()){
+		if(_switch_sections(pplistinstattribute)){
+			
 				result=true;
-			}else{
-				result=false;
-			}
+			
 		}else{
 			result=false;
 		}
@@ -2268,11 +2307,11 @@ boolean _switch_sections_aux(){
 /*switch_section =
 	switch_labels statement_list.*/
 
-boolean _switch_section(){
+boolean _switch_section(listinstvalueType ** pplistinstattribute){
 	boolean result;
-	if(_switch_labels()){
+	if(_switch_labels(pplistinstattribute)){
 		token=_lire_token();
-		if(_statement_list()){
+		if(_statement_list(pplistinstattribute)){
 			result=true;
 		}else{
 			result=false;
@@ -2292,11 +2331,11 @@ boolean _switch_section(){
 	   		switch_label switch_labels_aux
 	 		*/
 
-boolean _switch_labels(){
+boolean _switch_labels(listinstvalueType ** pplistinstattribute){
 	boolean result;
-	if(_switch_label()){
+	if(_switch_label(pplistinstattribute)){
 		token=_lire_token();
-		if(_switch_labels_aux()){
+		if(_switch_labels_aux(pplistinstattribute)){
 			result=true;
 		}else{
 			result=false;
@@ -2310,22 +2349,18 @@ boolean _switch_labels(){
 
 /*switch_labels_aux = switch_label switch_labels_aux | eps */
 
-boolean _switch_labels_aux(){
+boolean _switch_labels_aux(listinstvalueType ** pplistinstattribute){
 	boolean result;
-	if(_statement_list()){
+	if(token==BREAK ){
 		result=true;
 		follow_token=true;
+		
 	}else{
-		if(_switch_label()){
+		if(_switch_labels(pplistinstattribute)){
 
-			token=_lire_token();
-
-			if(_switch_labels_aux())
-			{
+			
 				result=true;
-			}else{
-				result=false;
-			}
+			
 		}else{
 			result=false;
 		}
@@ -2338,11 +2373,15 @@ boolean _switch_labels_aux(){
 	'case' constant_expression ':'
 	 | 'default' ':'.*/
 	 
-boolean _switch_label(){
+boolean _switch_label(listinstvalueType ** pplistinstattribute){
 	boolean result;
+
+	AST *past = (AST *) malloc(sizeof(AST)); // NEW
+	(*past) = (AST) malloc(sizeof(struct Exp));
+
 	if(token==CASE){
 		token=_lire_token();
-		if(_constant_expression()){
+		if(_constant_expression(past)){
 			token=_lire_token();
 			if(token==DOUBLEDOT){
 				result=true;
@@ -2378,21 +2417,21 @@ boolean _switch_label(){
 	 | for_statement
 	 | foreach_statement.*/
 
-boolean _iteration_statement(){
+boolean _iteration_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
 				if (debug) printf ("%s \n ","_iteration_statement");
 
 
-	if (_while_statement())
+	if (_while_statement(pplistinstattribute))
 	{
 		result=true;
 	}else{
-		if (_do_statement())
+		if (_do_statement(pplistinstattribute))
 		{
 			result=true;
 		}else{
-			if(_for_statement()){
+			if(_for_statement(pplistinstattribute)){
 				result=true;
 			}
 			else{
@@ -2406,21 +2445,27 @@ boolean _iteration_statement(){
 /*while_statement =
 	'while' '(' boolean_expression ')' embedded_statement.*/
 
-boolean _while_statement(){
+boolean _while_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
 					if (debug) printf ("%s \n ","_while_statement");
 
 
+	AST *past = (AST *) malloc(sizeof(AST)); // NEW
+	(*past) = (AST) malloc(sizeof(struct Exp));
+
+	listinstvalueType ** ppwhilecondition = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
+	listinstvalueType ** pplistwhile = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
+	
 	if(token==WHILE){
 		token=_lire_token();
 		if(token==POPEN){
 			token=_lire_token();
-			if(_boolean_expression()){
+			if(_boolean_expression(past)){
 				token=_lire_token();
 				if(token==PCLOSE){
 					token=_lire_token();
-					if(_embedded_statement()){
+					if(_embedded_statement(pplistwhile)){
 						result=true;
 					}else{
 						result=false;
@@ -2444,21 +2489,26 @@ boolean _while_statement(){
 /*do_statement =
 	'do' embedded_statement 'while' '(' boolean_expression ')' ';'.*/
 
-boolean _do_statement(){
+boolean _do_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
 				if (debug) printf ("%s \n ","_do_statement");
 
+	AST *past = (AST *) malloc(sizeof(AST)); // NEW
+	(*past) = (AST) malloc(sizeof(struct Exp));
+
+	listinstvalueType ** pplistdo = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
+	
 
 	if(token==DO){
 		token=_lire_token();
-		if(_embedded_statement()){
+		if(_embedded_statement(pplistdo)){
 			token=_lire_token();
 			if(token==WHILE){
 				token=_lire_token();
 				if(token==POPEN){
 					token=_lire_token();
-					if(_boolean_expression()){
+					if(_boolean_expression(past)){
 						token=_lire_token();
 						if(token==PCLOSE){
 							token=_lire_token();
@@ -2511,10 +2561,16 @@ boolean _do_statement(){
 
 	*/
 
-boolean _for_statement(){
+boolean _for_statement(listinstvalueType ** pplistinstattribute){
 	
 
-	boolean result; 
+	boolean result;
+
+	if (debug) printf ("%s \n ","_for_statement");
+
+	AST *past = (AST *) malloc(sizeof(AST)); // NEW
+	(*past) = (AST) malloc(sizeof(struct Exp));
+	 
 	
 	if (token == FOR){ // Si on trouve FOR 
 
@@ -2536,15 +2592,13 @@ boolean _for_statement(){
 
 						token = _lire_token();
 
-						if(_embedded_statement()){ //  FOR ( ; ; ) embedded_statement -----------------------
+						if(_embedded_statement(pplistinstattribute)){ //  FOR ( ; ; ) embedded_statement -----------------------
 							result = true;
 						}
 						else{
 							result = false;
 						}
-					}
-
-					else if (_for_iterator()){ // FOR ( ; ; for_iterator 
+					}else if (_for_iterator(pplistinstattribute)){ // FOR ( ; ; for_iterator 
 
 						token = _lire_token();
 
@@ -2552,7 +2606,7 @@ boolean _for_statement(){
 
 							token = _lire_token();
 
-							if(_embedded_statement()){ // FOR ( ; ; for_iterator ) embedded_statement ------------------ 
+							if(_embedded_statement(pplistinstattribute)){ // FOR ( ; ; for_iterator ) embedded_statement ------------------ 
 							result = true;
 							}
 							else{
@@ -2564,49 +2618,47 @@ boolean _for_statement(){
 					else{
 						result = false;
 					}
-				}
-
-				else if (_for_condition()){  // FOR ( ; FOR_CONDITION 
+				}else if (_for_condition(past)){  // FOR ( ; FOR_CONDITION 
 
 					token = _lire_token();
 
-					if (token == PVIRG){ // FOR ( ; FOR_CONDITION ;
+					if (token == PVIRG)
+					{ // FOR ( ; FOR_CONDITION ;
 
 						token = _lire_token();
 
-						if (token == PCLOSE){ //  FOR ( ; FOR_CONDITION ; )
+						if (token == PCLOSE)
+						{ //  FOR ( ; FOR_CONDITION ; )
 
 							token = _lire_token();
 
-							if(_embedded_statement()){ // FOR ( ; FOR_CONDITION ; ) embeddedd_statement --------------
+							if(_embedded_statement(pplistinstattribute)){ // FOR ( ; FOR_CONDITION ; ) embeddedd_statement --------------
 								result = true;
 							}
 							else{
 								result = false;
 							}
-						}
-
-						else if(_for_iterator()){//  FOR ( ; FOR_CONDITION ; FOR_ITERATOR
+						}else if(_for_iterator(pplistinstattribute))
+						{//  FOR ( ; FOR_CONDITION ; FOR_ITERATOR
 
 							token = _lire_token();
 
-							if (token == PCLOSE){ //  FOR ( ; FOR_CONDITION ; FOR_ITERATOR ) 
+							if (token == PCLOSE)
+							{ //  FOR ( ; FOR_CONDITION ; FOR_ITERATOR ) 
 
 								token = _lire_token();
 
-								if(_embedded_statement()){ // FOR ( ; FOR_CONDITION ; FOR_ITERATOR ) embedded_statement ----------------
+								if(_embedded_statement(pplistinstattribute))
+								{ // FOR ( ; FOR_CONDITION ; FOR_ITERATOR ) embedded_statement ----------------
 									result = true; 
-								}
-								else{
+								}else{
 									result = false;
 								}
 							}
 							else{
 								result = false;
 							}
-						}
-
-						else{
+						}else{
 							result = false;
 						}
 					}
@@ -2618,9 +2670,8 @@ boolean _for_statement(){
 				else{
 					result = false;
 				}
-			}
-
-			else if (_for_initializer()) {  // FOR ( FOR_initializer 
+			}else if (_for_initializer(pplistinstattribute))
+			{  // FOR ( FOR_initializer 
 
 
 				token = _lire_token();
@@ -2637,7 +2688,7 @@ boolean _for_statement(){
 
 							token = _lire_token();
 
-							if(_embedded_statement()){ //  FOR ( FOR_initializer ; ; ) embedded_statement ----------------
+							if(_embedded_statement(pplistinstattribute)){ //  FOR ( FOR_initializer ; ; ) embedded_statement ----------------
 								result = true;
 							}
 							else{
@@ -2645,7 +2696,7 @@ boolean _for_statement(){
 							}
 						}
 
-						else if (_for_iterator()){ // FOR ( FOR_initializer ; ; FOR_ITERATOR 
+						else if (_for_iterator(pplistinstattribute)){ // FOR ( FOR_initializer ; ; FOR_ITERATOR 
 
 							token = _lire_token();
 
@@ -2653,7 +2704,7 @@ boolean _for_statement(){
 
 								token = _lire_token();
 
-								if(_embedded_statement()){ //  FOR ( FOR_initializer ; ; FOR_ITERATOR ) embedded_statement -----------------------
+								if(_embedded_statement(pplistinstattribute)){ //  FOR ( FOR_initializer ; ; FOR_ITERATOR ) embedded_statement -----------------------
 								result = true;
 								}
 								else{
@@ -2666,9 +2717,8 @@ boolean _for_statement(){
 							result = false;
 						}
 
-					}
-
-					else if (_for_condition()){  // FOR ( FOR_initializer ; FOR_CONDITION
+					}else if (_for_condition(past))
+					{  // FOR ( FOR_initializer ; FOR_CONDITION
 
 						token = _lire_token();
 
@@ -2680,15 +2730,14 @@ boolean _for_statement(){
 
 								token = _lire_token();
 
-								if(_embedded_statement()){  // FOR ( FOR_initializer ; FOR_CONDITION ; ) embedded_statement ----------------------
+								if(_embedded_statement(pplistinstattribute)){  // FOR ( FOR_initializer ; FOR_CONDITION ; ) embedded_statement ----------------------
 									result = true;
 								}
 								else{
 									result = false;
 								}
-							}
-
-							else if(_for_iterator()){  // FOR ( FOR_initializer ; FOR_CONDITION ; FOR_IETRATOR 
+							}else if(_for_iterator(pplistinstattribute))
+							{  // FOR ( FOR_initializer ; FOR_CONDITION ; FOR_IETRATOR 
 
 								token = _lire_token();
 
@@ -2696,7 +2745,7 @@ boolean _for_statement(){
 
 									token = _lire_token();
 
-									if(_embedded_statement()){ // FOR ( FOR_initializer ; FOR_CONDITION ; FOR_IETRATOR ) embedded_statemnt --------------------
+									if(_embedded_statement(pplistinstattribute)){ // FOR ( FOR_initializer ; FOR_CONDITION ; FOR_IETRATOR ) embedded_statemnt --------------------
 										result = true;
 									}
 									else{
@@ -2749,7 +2798,7 @@ boolean _for_statement(){
 	local_variable_declaration
 	 | statement_expression_list.*/
 
-boolean _for_initializer(){
+boolean _for_initializer(listinstvalueType ** pplistinstattribute){
 
 	boolean result = false;
 
@@ -2760,7 +2809,7 @@ boolean _for_initializer(){
 
 	else{
 
-		if(_statement_expression_list()){
+		if(_statement_expression_list(pplistinstattribute)){
 
 			result = true; 
 		}
@@ -2772,11 +2821,11 @@ boolean _for_initializer(){
 /*for_condition =
 	boolean_expression.*/
 
-boolean _for_condition(){
+boolean _for_condition(AST *past){
 
 	boolean result = false; 
 
-	if(_boolean_expression()){ //boolean_expression ma3reftch finahiya 
+	if(_boolean_expression(past)){ //boolean_expression ma3reftch finahiya 
 
 		result = true; 
 	}
@@ -2787,11 +2836,11 @@ boolean _for_condition(){
 /*for_iterator =
 	statement_expression_list.*/
 
-boolean _for_iterator(){
+boolean _for_iterator(listinstvalueType ** pplistinstattribute){
 
 	boolean result = false; 
 
-	if(_statement_expression_list()){
+	if(_statement_expression_list(pplistinstattribute)){
 
 		result = true; 
 	}
@@ -2809,44 +2858,54 @@ boolean _for_iterator(){
 	statement_expression_list = statement_expression statement_expression_list_aux
 	
 	statement_expression_list_aux = ',' statement_expression statement_expression_list_aux
-											| statement_expression
+											| eps
 	*/
 
-boolean _statement_expression_list(){
+boolean _statement_expression_list(listinstvalueType ** pplistinstattribute){
 
 	boolean result = false;
 
-	if(_statement_expression()){
+	if(_statement_expression(pplistinstattribute)){
 
-		if(_statement_expression_list_aux()){
+			token=_lire_token();
+
+		if(_statement_expression_list_aux(pplistinstattribute)){
 
 			result = true; 
 
+		}else{
+			result=false;
 		}
+	}else{
+		result=false;
 	}
 
 	return result; 
 }
 
 
-boolean _statement_expression_list_aux(){
+boolean _statement_expression_list_aux(listinstvalueType ** pplistinstattribute){
 
 	boolean result = false; 
 
-	if(_statement_expression()){
+	if(token==PVIRG || token==PCLOSE){
 
 		result = true; 
-	}
-	else{
+		follow_token=true;
+	}else{
 		if(token == VIRG){
-
-			if(_statement_expression()){
-
-				if(_statement_expression_list_aux()){
+				token=_lire_token();
+				if(_statement_expression_list(pplistinstattribute)){
 
 					result = true; 
+				}else{
+
+					result=false;
 				}
-			}
+			
+		}else{
+
+			result=false;
 		}
 	}
 
@@ -2858,9 +2917,13 @@ boolean _statement_expression_list_aux(){
 
 
 int main(){
+
+	listinstvalueType ** pplistinstattribute = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
+	*pplistinstattribute = NULL;
+
 	token=_lire_token();
 
-	if(_statement_list()){
+	if(_statement_list(pplistinstattribute)){
 		printf("ok\n");
 	}else{
 		printf("nno\n");
