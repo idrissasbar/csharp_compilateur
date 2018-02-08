@@ -2090,10 +2090,8 @@ boolean _selection_statement(){
 }
 
 
-/*if_statement =
-	'if' '(' boolean_expression ')' embedded_statement
-	 | 'if' '(' boolean_expression ')' embedded_statement 'else' embedded_statement.*/
-
+/*if_statement  = 'if' '(' boolean_expression ')' embedded_statement if_statement_aux
+ */
 boolean _if_statement(){
 	boolean result;
 	if(token==IF){
@@ -2105,15 +2103,9 @@ boolean _if_statement(){
 				if(token==PCLOSE){
 					token=_lire_token();
 					if(_embedded_statement()){
-						result=true;
 						token=_lire_token();
-						if(token==ELSE){
-							token=_lire_token();
-							if(_embedded_statement()){
-								result=true;
-							}else{
-								result=false;
-							}
+						if(_if_statement_aux()){
+							result=true;
 						}else{
 							result=false;
 						}
@@ -2135,6 +2127,23 @@ boolean _if_statement(){
 
 	return result;
 }
+
+/*if_statement_aux= 'else' embedded_statement | epsilon*/
+boolean _if_statement_aux(){
+	boolean result;
+	if(token==ELSE){
+		token=_lire_token();
+		if(_embedded_statement()){
+		 	result=true;	
+		}else{
+			result=false;
+		}
+	}else{
+		result=true;
+	}
+	return result;
+}
+
 /*switch_statement =
 	'switch' '(' expression ')' switch_block.*/
 
