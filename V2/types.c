@@ -235,8 +235,8 @@ void inserer_inst_en_queue(listinstvalueType * plistinstattribute, instvalueType
 }
 
 pseudocode generer_pseudo_code_inst(instvalueType instattribute){
-  static int label_index = 0;
-  pseudocode  pc, pc1,pc2,pc3,pc31,pc4,pc5,pc6,pc7, pc8, pc9, pc10, pc11, pc12;
+  static label_index = 0;
+  pseudocode  pc0,pc, pc1,pc2,pc3,pc31,pc4,pc5,pc6,pc7, pc8, pc9, pc10, pc11, pc12;
   pseudocode  rexpcode;
   char * label_name;
   char *label_num;
@@ -464,7 +464,63 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
     pc11->next = pc12;
 
     break;
-   
+   //while
+   case While:
+
+    /*pc = (pseudocode)malloc(sizeof (struct pseudocodenode));  
+    pc->first.codop = LOAD;
+    pc->first.param.var = name(instattribute.node.whilenode.rangvar);*/
+    // le début du while
+    pc = (pseudocode)malloc(sizeof (struct pseudocodenode));    
+    pc->first.codop = LABEL;
+    label_num=itoa(label_index++);    
+    pc->first.param.label_name = (char*) malloc(4+strlen(label_num));
+    strcpy( pc->first.param.label_name, "while");
+    strcat( pc->first.param.label_name, label_num);
+
+    pc0 = generer_pseudo_code_ast(instattribute.node.whilenode.right);
+
+    //var a comparer
+    pc1 = (pseudocode)malloc(sizeof (struct pseudocodenode));
+    pc1->first.codop = LOAD;
+    pc1->first.param.var = name(instattribute.node.whilenode.rangvar);
+    pc1->next = NULL;
+
+    //si condition false jump to "endwhile"
+    pc2 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
+    pc2->first.codop = JNE;
+    label_num=itoa(label_index++);
+    pc2->first.param.label_name = (char*) malloc(6+strlen(label_num));
+    strcpy( pc2->first.param.label_name, "endwhile");
+    strcat( pc2->first.param.label_name, label_num);
+
+    if (debug)    printf("label == %s", pc2->first.param.label_name);
+    pc2->next = NULL;
+
+    //corps de while
+    pc3 = generer_pseudo_code_list_inst(instattribute.node.whilenode.whilebodylinst);
+
+    //apres chaque itération retour vers "while"
+    pc31 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
+    pc31->first.codop = JMP;
+    pc31->first.param.label_name = (char*) malloc(6+strlen(label_num));
+    strcpy( pc31->first.param.label_name, pc->first.param.label_name);
+    strcat( pc31->first.param.label_name, label_num);
+
+    //endwhile
+    pc4 = (pseudocode)malloc(sizeof (struct pseudocodenode));
+    pc4->first.codop = LABEL;
+    pc4->first.param.label_name = pc2->first.param.label_name;
+    pc4->next = NULL;
+
+    pc31->next = pc4;
+
+    inserer_code_en_queue(pc3, pc31);
+    pc->next = pc0;
+    pc2->next = pc3;
+    pc1->next = pc2;
+    inserer_code_en_queue(pc0, pc1);
+
   }
   
   return pc;

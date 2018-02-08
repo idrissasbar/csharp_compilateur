@@ -7,7 +7,6 @@
 // auteur Karim Baïna, ENSIAS, Décembre 2010
 
 #define NULL ((void *)0)
-extern boolean debug;
 //typedef enum {false=0, true=1} boolean; //deja defini en AST.h
 
 //typedef enum {Int, Bool} Type; //deja defini en AST.h
@@ -68,6 +67,14 @@ typedef struct INST {
       int bornesup; // l'expression borne sup
       struct LIST_INST * forbodylinst; // for body list of instructions
     } fornode;
+      
+    //while( idf ){ list_inst }
+    struct {
+      int rangvar;//// indice de l'idf à comparer dans la table des symboles
+       AST right; // l'expression à comparer
+      struct LIST_INST * whilebodylinst; // while body list of instructions  
+    }whilenode;
+
   } node;
 } instvalueType;
 
@@ -111,4 +118,5 @@ extern pseudocode generer_pseudo_code_list_inst(listinstvalueType * plistinstatt
 
 extern pseudocode generer_pseudo_code(listinstvalueType * plistinstattribute);
 
+#define debug false
 #endif
