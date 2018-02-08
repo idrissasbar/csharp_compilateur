@@ -801,5 +801,7 @@ gcc -c analyseur_csharp.c
 gcc -c lex.yy.c
 gcc -o csharpc lex.yy.o  analyseur_csharp.o -lfl
 */
-
+void set_idf_attributes(char *name, int line);
+void set_number_attributes(double value);
+void set_token_attributes(int line);
 #endif
