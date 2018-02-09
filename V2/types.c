@@ -375,7 +375,7 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
 
     pc = generer_pseudo_code_list_inst(instattribute.node.fornode.forinitializerlist);
   
-  pc1 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
+    pc1 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
     pc1->first.codop = LABEL;
     label_num=itoa(label_index++);    
     pc1->first.param.label_name = (char*) malloc(4+strlen(label_num));
@@ -438,27 +438,27 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
     strcpy( pc->first.param.label_name, "while");
     strcat( pc->first.param.label_name, label_num);
 
-    pc0 = generer_pseudo_code_ast(instattribute.node.whilenode.right);
+    pc1 = generer_pseudo_code_ast(instattribute.node.whilenode.right);
 
-    //var a comparer
-    pc1 = (pseudocode)malloc(sizeof (struct pseudocodenode));
-    pc1->first.codop = LOAD;
-    pc1->first.param.var = name(instattribute.node.whilenode.rangvar);
-    pc1->next = NULL;
+    pc->next = pc1;
 
     //si condition false jump to "endwhile"
     pc2 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
     pc2->first.codop = FJMP;
-    label_num=itoa(label_index++);
+    //label_num=itoa(label_index++);
     pc2->first.param.label_name = (char*) malloc(6+strlen(label_num));
     strcpy( pc2->first.param.label_name, "endwhile");
     strcat( pc2->first.param.label_name, label_num);
+
+    inserer_code_en_queue(pc1, pc2);
 
     if (debug)    printf("label == %s", pc2->first.param.label_name);
     pc2->next = NULL;
 
     //corps de while
     pc3 = generer_pseudo_code_list_inst(instattribute.node.whilenode.whilebodylinst);
+
+    pc2->next = pc3;
 
     //apres chaque itération retour vers "while"
     pc31 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
@@ -467,6 +467,8 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
     strcpy( pc31->first.param.label_name, pc->first.param.label_name);
     strcat( pc31->first.param.label_name, label_num);
 
+    inserer_code_en_queue(pc3, pc31);
+
     //endwhile
     pc4 = (pseudocode)malloc(sizeof (struct pseudocodenode));
     pc4->first.codop = LABEL;
@@ -474,13 +476,7 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
     pc4->next = NULL;
 
     pc31->next = pc4;
-
-    inserer_code_en_queue(pc3, pc31);
-    pc->next = pc0;
-    pc2->next = pc3;
-    pc1->next = pc2;
-    inserer_code_en_queue(pc0, pc1);
-
+    
   }
   
   return pc;
