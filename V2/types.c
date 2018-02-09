@@ -286,15 +286,10 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
   case IfThenArith :
     if (debug) printf("If");
     
-    pc = generer_pseudo_code_ast(instattribute.node.ifnode.right);
-
-    pc1 = (pseudocode)malloc(sizeof (struct pseudocodenode));
-    pc1->first.codop = LOAD;
-    pc1->first.param.var = name(instattribute.node.ifnode.rangvar);
-    pc1->next = NULL;
+    pc1 = generer_pseudo_code_ast(instattribute.node.ifnode.astexp);
 
     pc2 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
-    pc2->first.codop = JNE;
+    pc2->first.codop = FJMP;
     label_num=itoa(label_index++);
     pc2->first.param.label_name = (char*) malloc(6+strlen(label_num));
     strcpy( pc2->first.param.label_name, "endif");
@@ -313,7 +308,6 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
     inserer_code_en_queue(pc3, pc4);
     pc2->next = pc3;
     pc1->next = pc2;
-    inserer_code_en_queue(pc, pc1);
 
     if (debug)   {printf("debut-- ");afficher_pseudo_code(pc);printf(" --fin");}
     break;
@@ -321,15 +315,10 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
   case IfThenElseArith :
     if (debug) printf("If");
     
-    pc = generer_pseudo_code_ast(instattribute.node.ifnode.right);
-
-    pc1 = (pseudocode)malloc(sizeof (struct pseudocodenode));
-    pc1->first.codop = LOAD;
-    pc1->first.param.var = name(instattribute.node.ifnode.rangvar);
-    pc1->next = NULL;
+    pc1 = generer_pseudo_code_ast(instattribute.node.ifnode.astexp);
 
     pc2 = (pseudocode)malloc(sizeof (struct pseudocodenode));    
-    pc2->first.codop = JNE;
+    pc2->first.codop = FJMP;
     label_num=itoa(label_index++);
     pc2->first.param.label_name = (char*) malloc(6+strlen(label_num));
     strcpy( pc2->first.param.label_name, "else");
@@ -365,8 +354,7 @@ pseudocode generer_pseudo_code_inst(instvalueType instattribute){
     inserer_code_en_queue(pc3, pc31);
     pc2->next = pc3;
     pc1->next = pc2;
-    inserer_code_en_queue(pc, pc1);
-
+    
     if (debug) {printf("debut-- ");afficher_pseudo_code(pc);printf(" --fin");}
 
     break;

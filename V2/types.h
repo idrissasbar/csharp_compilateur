@@ -54,13 +54,13 @@ typedef struct INST {
     } assignnode;
     // IF ... THEN 
     struct  {
-      int rangvar; // indice de l'idf à comparer, dans la table des symbole
+      //int rangvar; // indice de l'idf à comparer, dans la table des symbole
       //double right; // la valeur de comparaison
-      AST right; // l'expression à comparer
+      AST astexp; // l'expression à comparer
       struct LIST_INST * thenlinst; // then list of instructions
       struct LIST_INST * elselinst; // else list of instructions
     } ifnode;
-      // for (index:= exp_min..exp_max) loop list_inst end loop;
+      // for (exp;cond;exp) { list_inst  };
     struct {
       struct LIST_INST * forinitializerlist; // l'expression borne inf
       AST forcondition; // l'expression borne sup
@@ -68,10 +68,9 @@ typedef struct INST {
       struct LIST_INST * forbodylinst;// for body list of instructions
     } fornode;
       
-    //while( idf ){ list_inst }
+    //while( ast ){ list_inst }
     struct {
-      int rangvar;//// indice de l'idf à comparer dans la table des symboles
-       AST right; // l'expression à comparer
+      AST right; // l'expression à comparer
       struct LIST_INST * whilebodylinst; // while body list of instructions  
     }whilenode;
 
