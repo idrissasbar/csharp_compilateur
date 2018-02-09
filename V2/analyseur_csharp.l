@@ -22,9 +22,10 @@ tab       = '\u0009'. /*9*/
 "??"						{if (debug) printf ("?? \n");return NULLCOALESCING;}
 "?"							{if (debug) printf ("? \n");return POINTINTER;}
 ":"							{if (debug) printf (": \n");return DOUBLEDOT;}
+"."							{if (debug) printf (". \n");return POINT;}
 ","							{if (debug) printf (", \n");return VIRG;}
-{DIGIT}+"."{DIGIT}*			{if (debug) printf ("%s \n",yytext);	return DOUBLENUMBER;}
-{DIGIT}+					{if (debug) printf ("%s \n",yytext);	return INTNUMBER;}
+{DIGIT}+"."{DIGIT}*			{if (debug) printf ("%s \n",yytext); set_number_attributes(atof(yytext));	return DOUBLENUMBER;}
+{DIGIT}+					{if (debug) printf ("%s \n",yytext); set_number_attributes((double)atoi(yytext));	return INTNUMBER;}
 "abstract"					{if (debug) printf ("%s \n",yytext);	return ABSTRACT;}
 "as"						{if (debug) printf ("%s \n",yytext);	return AS;}
 "base"						{if (debug) printf ("%s \n",yytext);	return BASE;}
@@ -68,6 +69,7 @@ tab       = '\u0009'. /*9*/
 "new"						{if (debug) printf ("%s \n",yytext);	return NEW;} 		
 "null"						{if (debug) printf ("%s \n",yytext);	return NNULL;}
 "object"					{if (debug) printf ("%s \n",yytext);	return OBJECT;}
+"dynamic"					{if (debug) printf ("%s \n",yytext);	return DYNAMIC;}
 "operator"					{if (debug) printf ("%s \n",yytext);	return OPERATOR;}
 "out"						{if (debug) printf ("%s \n",yytext);	return OUT;}
 "override"					{if (debug) printf ("%s \n",yytext);	return OVERRIDE;}
@@ -102,6 +104,8 @@ tab       = '\u0009'. /*9*/
 "void" 						{if (debug) printf ("%s \n",yytext);	return VOID;}
 "volatile" 					{if (debug) printf ("%s \n",yytext);	return VOLATILE;}
 "while"						{if (debug) printf ("%s \n",yytext);	return WHILE;}
+"remove"					{if (debug) printf ("%s \n",yytext);	return REMOVE;}
+"partial"					{if (debug) printf ("%s \n",yytext);	return PARTIAL;}
 "["							{if (debug) printf ("[ \n"); return LEFTBRACKET;}
 "]"							{if (debug) printf ("] \n"); return RIGHTBRACKET;}
 "("							{if (debug) printf ("( \n"); return POPEN;}
@@ -123,6 +127,8 @@ tab       = '\u0009'. /*9*/
 "^="  						{if (debug) printf ("^= \n"); return XOREQ; }
 "&"  						{if (debug) printf ("& \n"); return AND; }
 "&="  						{if (debug) printf ("&= \n"); return ANDEQ; }
+"~"  						{if (debug) printf ("~ \n"); return TILDE; }
+"!"  						{if (debug) printf ("! \n"); return EXCL; }
 "|"  						{if (debug) printf ("| \n"); return OR; }
 "|="  						{if (debug) printf ("|= \n"); return OREQ; }
 "<"  						{if (debug) printf ("< \n"); return LT; }
@@ -141,7 +147,7 @@ tab       = '\u0009'. /*9*/
 "--"  						{if (debug) printf ("-- \n"); return MINUSMINUS; }	
 "var"						{if (debug) printf ("VAR \n"); return VAR;}		
 <<EOF>>     				{if (debug) printf ("EOF \n"); return END_OF_FILE;}
-{IDFF}						{if (debug) printf ("identifier \n");	return IDF;}
-.							{ printf( "ERRORLEX(%s) ", yytext );}
+{IDFF}						{if (debug) printf ("identifier \n"); set_idf_attributes(yytext, yylineno);	return IDF;}
+.							{if (debug) printf( "ERRORLEX(%s) ", yytext );set_token_attributes(yylineno);}
 
 %%

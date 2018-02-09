@@ -130,6 +130,12 @@ typedef enum{
 	AND,
 	XOR,
 	MOD,
+	EXCL,
+	TILDE,
+	POINT,
+	PARTIAL,
+	DYNAMIC,
+	REMOVE,
 	END_OF_FILE
 
 
@@ -152,6 +158,37 @@ type =
 	 | type_unsafe.
 */
 
+
+
+/*********************argument_list =
+									argument
+									 | argument_list, ',', argument;*/
+/* argument_list = argument argument_list_aux*/
+
+boolean _argument_list();
+
+/*argument_list_aux = ',' argument argument_list_aux | eps */
+
+boolean _argument_list_aux();
+/*argument =
+	[argument_name], argument_value;*/
+/*
+argument = argument_name argument_value | argument_value */
+
+boolean _argument();
+
+/*argument_name =
+	identifier, ':';*/
+boolean _argument_name();
+
+/*argument_value =
+	expression
+	 | 'ref', variable_reference
+	 | 'out', variable_reference;*/
+
+boolean _argument_value();
+
+boolean _variable_reference();
 boolean _type();
 
 /*
@@ -689,6 +726,8 @@ boolean _selection_statement();
 boolean _if_statement();
 /*switch_statement =
 	'switch' '(' expression ')' switch_block.*/
+/*if_statement_aux= 'else' embedded_statement | epsilon*/
+boolean _if_statement_aux();
 
 boolean _switch_statement();
 /*switch_block =

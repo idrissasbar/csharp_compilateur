@@ -50,6 +50,10 @@ double valinit(int rang){
   return TS[rang].valinit;
 }
 
+int line(int rang){
+  return TS[rang].line;
+}
+
 void set_valinit(int rang, double val){
   TS[rang].valinit = val;
 }

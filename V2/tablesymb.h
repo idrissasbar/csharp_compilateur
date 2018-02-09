@@ -17,6 +17,7 @@ extern void ajouter_nouvelle_variable_a_TS(varvalueType newvar);
 
 extern void incrementer_nombre_declarations(int rangvar);
 extern char* name(int rang);
+extern int line(int rang);
 extern Type typevar(int rang);
 extern double valinit(int rang);
 extern void set_valinit(int rang, double val);

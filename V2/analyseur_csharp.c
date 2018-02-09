@@ -5,6 +5,9 @@
 #include"analyseur_csharp.h"
 #include"types.h"
 #include"error.h"
+#include "tablesymb.h"
+#include "classes.h"
+#include "start.h"
 
 extern boolean debug;
 
@@ -17,6 +20,8 @@ extern char *yytext;
 typetoken token;
 
 //varvalueType var;
+
+int localrangvar;
 
 boolean follow_token=false;
 
@@ -57,6 +62,7 @@ void set_number_attributes(double value){
 void set_token_attributes(int line){
 	tokenattribute.line = line;
 }
+
 
 /*
 type =
@@ -134,7 +140,7 @@ boolean _simple_type(){
 
 
 		if (token==BOOL)
-		{
+		{	constattribute.typename = Bool;
 			result=true;
 		}else{
 			if (_numeric_type())
@@ -158,7 +164,7 @@ boolean _numeric_type(){
 	if (debug) printf ("%s \n ","_numeric_type");
 
 	if (token==DECIMAL)
-	{
+	{	constattribute.typename = Double;
 		result=true;
 	}else{
 		if (_integral_type())
@@ -199,31 +205,31 @@ boolean _integral_type(){
 
     switch(token){
     	case SBYTE : result = true; 
-
+    				constattribute.typename = Int;
     				break;
     	case BYTE : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	case SHORT : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	case USHORT : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	case INT : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	case UINT : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	case LONG : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	case ULONG : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	case CHAR : result = true;
-
+    				constattribute.typename = Int;
     				break;
     	default : result = false;
 
@@ -242,9 +248,11 @@ boolean _floating_point_type(){
 
 
 	if (token == FLOAT) {
+		constattribute.typename = Double;
 		result = true;
 	}else{
 		if (token == DOUBLE) {
+			constattribute.typename = Double;
 			result = true;
 		}else{
 			result = false;
@@ -418,6 +426,7 @@ if (debug) printf ("%s \n ","local_variable_declarators_aux");
 
 
 
+
 /*local_variable_declarator = identifier local_variable_declarator_aux*/
 
 boolean _local_variable_declarator(){
@@ -429,7 +438,35 @@ if (debug) printf ("%s \n ","_local_variable_declarator");
 		token=_lire_token();
 
 		if (_local_variable_declarator_aux())
-		{
+		{		
+			// 5eme gestion erreur AlreadyDeclared : l'IDF peut être déjà déclaré
+				if (inTS(varattribute.name, &rangvar) == true) {
+					semanticerror = true;
+					creer_sm_erreur_declaration(AlreadyDeclared, varattribute.line, varattribute.name);
+				}else{
+					varvalueType newvar;
+					newvar.nbdecl = 1;
+			    		newvar.name = (char *)malloc(sizeof(char)*strlen(varattribute.name)+1);
+					strcpy(newvar.name, varattribute.name);
+					if (debug) printf("VAR{%s}-->NEW{%s}",varattribute.name, newvar.name);
+					newvar.line = varattribute.line;
+					newvar.initialisation = varattribute.initialisation; // l'initialisation est marquée par decl_aux dans varattribute
+				        newvar.typevar = typeattribute.typename;
+			      		newvar.valinit = ((varattribute.initialisation == true)?constattribute.valinit:0.0);
+			      		constattribute.valinit=0.0;
+					ajouter_nouvelle_variable_a_TS(newvar);
+				}
+
+				// 6eme gestion erreur BadlyInitialised : l'IDF peut avoir été initialisé par une constante du mauvais type
+				if (varattribute.initialisation == true){
+				    if (constattribute.typename != typeattribute.typename){ //Int/Double, Double/Int, Double/Bool, Bool/Double, Int/Bool, Bool/Int
+					if ( (typeattribute.typename != Double) || (constattribute.typename != Int) ){  // ce n'est pas Double := Int
+						semanticerror = true;
+						creer_sm_erreur_declaration(BadlyInitialised, varattribute.line, varattribute.name);
+					}
+				        //else casting implicit Double = (Double) Int
+				    }
+				}
 			
 				result=true;
 			
@@ -454,7 +491,7 @@ boolean _local_variable_declarator_aux(){
 	if (debug) printf ("%s \n ","_local_variable_declarator_aux");
 
 	if (token==VIRG || token==PVIRG)
-	{
+	{	varattribute.initialisation = false;
 		result=true;
 		follow_token=true;
 	}else{
@@ -464,7 +501,7 @@ boolean _local_variable_declarator_aux(){
 			token=_lire_token();
 
 			if (_local_variable_initializer())
-			{
+			{	varattribute.initialisation = true;
 				result=true;
 			}else{
 
@@ -489,7 +526,11 @@ local_variable_initializer =
 boolean _local_variable_initializer(listinstvalueType ** pplistinstattribute){
 	boolean result;
 if (debug) printf ("%s \n ","_local_variable_initializer");
-	if (_expression(pplistinstattribute))	
+
+AST *past = (AST *) malloc(sizeof(AST)); // NEW
+(*past) = (AST) malloc(sizeof(struct Exp));
+
+	if (_expression(past))	
 	{
 		result=true;
 	}else{
@@ -543,13 +584,28 @@ if (debug) printf ("%s \n ","_assignment");
 		if (_assignment_operator())
 		{
 			token=_lire_token();
-			if (_expression(past))
-			{
+			if (_expression(past)){
+
+				if (semanticerror != true){
+				     	if (typevar(localrangvar) == constattribute.typename) {
+						//*past = creer_feuille_booleen(true);
+						//*ppinstattribute = creer_instruction_affectation(localrangvar, past);
+					     }else{
+						semanticerror = true ;
+						// 2eme gestion erreur IncompatibleAssignType : l'affectation peut être mal typée
+						creer_sm_erreur_instruction(IncompatibleAssignType, line(localrangvar), name(localrangvar));
+					     }
+				     }
+				
 				result=true;
 			}else{
 				result=false;
 			}
+		}else{
+			result=false;
 		}
+	}else{
+		result=false;
 	}
 	return result;
 }
@@ -612,10 +668,10 @@ if (debug) printf ("%s \n ","_assignment_operator");
 	 | cast_expression
 	 | unary_expression_unsafe;*/
 
-boolean _unary_expression(){
+boolean _unary_expression(AST *past){
 	boolean result;
 if (debug) printf ("%s \n ","_unary_expression");
-	if (_primary_expression())
+	if (_primary_expression(past))
 	{
 		result=true;
 	}else{
@@ -638,10 +694,10 @@ primary_expression =
 	primary_no_array_creation_expression
 	 | array_creation_expression;*/
 
-boolean _primary_expression(){
+boolean _primary_expression(AST *past){
 	boolean result;
 if (debug) printf ("%s \n ","_primary_expression");
-	if (_primary_no_array_creation_expression())	
+	if (_primary_no_array_creation_expression(past))	
 	{
 		result=true;
 	}else{
@@ -671,11 +727,11 @@ primary_no_array_creation_expression =
 	 | anonymous_method_expression
 	 | primary_no_array_creation_expression_unsafe;*/
 
-boolean _primary_no_array_creation_expression(){
+boolean _primary_no_array_creation_expression(AST *past){
 	boolean result;
 if (debug) printf ("%s \n ","_primary_no_array_creation_expression");
 
-	if (_literal())
+	if (_literal(past))
 	{
 		result=true;
 	}else{
@@ -685,7 +741,7 @@ if (debug) printf ("%s \n ","_primary_no_array_creation_expression");
 			result=true;
 		}else{
 
-			if (_parenthesized_expression())
+			if (_parenthesized_expression(past))
 			{
 				result=true;
 			}else{
@@ -708,25 +764,31 @@ literal =
 	 | string_literal
 	 | null_literal;
 */
-boolean _literal(){
+boolean _literal(AST *past){
 	boolean result;
 
 if (debug) printf ("%s \n ","_literal");
 
 	if (token==FALSE)
-	{
+	{	constattribute.typename = Bool;
+		*past = creer_feuille_booleen(true);
 		result=true;
 	}else{
 		if (token==TRUE)
-		{
+		{	constattribute.typename = Bool;
+			*past = creer_feuille_booleen(true);
 			result=true;
 		}else{
 			if (token==INTNUMBER)
-			{
+			{	constattribute.typename = Int;
+				
+		*past = creer_feuille_nombre(constattribute.valinit, Int);
 				result=true;
 			}else{
 				if (token==DOUBLENUMBER)
-				{
+				{	constattribute.typename = Double;
+
+		*past = creer_feuille_nombre(constattribute.valinit, Double);
 					result=true;
 				}else{
 					result=false;
@@ -747,11 +809,13 @@ if (debug) printf ("%s \n ","_literal");
 
 boolean 	_simple_name(){
 	boolean result;
-
 	if (debug) printf ("%s \n ","_simple_name");
 
 			if (token==IDF)
-			{
+			{	if (inTS(varattribute.name, &localrangvar) == false) {
+					semanticerror = true ;
+					creer_sm_erreur_instruction(NotDeclared, varattribute.line, varattribute.name);
+				}
 				result=true;
 			}else{
 
@@ -841,12 +905,36 @@ boolean 	_multiplicative_expression(AST *past){
 
 			if (debug) printf ("%s \n ","_multiplicative_expression");
 
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
 
-		if (_unary_expression(past))
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+	
+		if (_unary_expression(past1))
 		{
 			token=_lire_token();
+
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+		
 			if (_multiplicative_expression_aux(past))
-			{
+			{	
+
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));
+				}else {(*past) = *past1;} // ??
+
 				result=true;
 			}else{
 
@@ -884,6 +972,7 @@ boolean _multiplicative_expression_aux(AST *past){
 			if (token==MULT)
 			{
 				token=_lire_token();
+*past = creer_noeud_operation('*', *past, NULL, type(*past)); 
 
 				if (_multiplicative_expression(past))
 				{
@@ -897,6 +986,7 @@ boolean _multiplicative_expression_aux(AST *past){
 					if (token==DIV)
 						{
 							token=_lire_token();
+*past = creer_noeud_operation('/', *past, NULL, type(*past)); 
 
 								if (_multiplicative_expression(past))
 								{
@@ -909,6 +999,7 @@ boolean _multiplicative_expression_aux(AST *past){
 								if (token==MOD)
 								{
 									token=_lire_token();
+*past = creer_noeud_operation('%', *past, NULL, type(*past)); 
 
 									if (_multiplicative_expression(past))
 									{
@@ -944,12 +1035,34 @@ boolean 	_additive_expression(AST *past){
 
 		if (debug) printf ("%s \n ","_additive_expression");
 
-		if (_multiplicative_expression(past))
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
+
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+		if (_multiplicative_expression(past1))
 		{
 			token=_lire_token();
 
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+		
+
 			if (_additive_expression_aux(past))
-			{
+			{	
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) == type(arbre_droit(*past))){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+			
+
+					}else (*past)->typename = Double;
+				}else {(*past) = *past1;} // ??
+			
 				result=true;
 			}else{
 
@@ -983,6 +1096,7 @@ boolean 	 _additive_expression_aux(AST *past){
 			if (token==PLUS)
 			{
 				token=_lire_token();
+					*past = creer_noeud_operation('+', *past, NULL, type(*past)); 
 
 					if (_additive_expression(past))
 					{
@@ -995,6 +1109,7 @@ boolean 	 _additive_expression_aux(AST *past){
 					if (token==MINUS)
 					{
 						token=_lire_token();
+*past = creer_noeud_operation('-', *past, NULL, type(*past)); 
 
 						if (_additive_expression(past))
 						{
@@ -1029,12 +1144,36 @@ boolean 	_shift_expression(AST *past){
 			if (debug) printf ("%s \n ","_shift_expression");
 
 
-		if (_additive_expression(past))
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
+
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+
+		if (_additive_expression(past1))
 		{
 			token=_lire_token();
 
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+		
+
 			if (_shift_expression_aux(past))
-			{
+			{	
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));
+				}else {(*past) = *past1;} // ??
+			
 				result=true;
 			}else{
 
@@ -1069,6 +1208,7 @@ boolean _shift_expression_aux(AST *past){
 			if (token==LTLT)
 			{
 				token=_lire_token();
+					*past = creer_noeud_operation('L', *past, NULL, type(*past)); 
 
 					if (_shift_expression(past))
 					{
@@ -1081,6 +1221,7 @@ boolean _shift_expression_aux(AST *past){
 					if (token==GTGT)
 					{
 						token=_lire_token();
+*past = creer_noeud_operation('R', *past, NULL, type(*past)); 
 
 						if (_shift_expression(past))
 						{
@@ -1120,13 +1261,36 @@ boolean 	_relational_expression(AST *past){
 
 		if (debug) printf ("%s \n ","_relational_expression");
 
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
 
-		if (_shift_expression(past))
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+		if (_shift_expression(past1))
 		{
 			token=_lire_token();
 
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+		
+
 			if (_relational_expression_aux(past))
-			{
+			{	
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));
+				}else {(*past) = *past1;} // ??
+			
+
 				result=true;
 			}else{
 				result=false;
@@ -1177,6 +1341,8 @@ boolean 	_relational_expression_aux(AST *past){
 		{
 			token=_lire_token();
 
+*past = creer_noeud_operation('<', *past, NULL, type(*past)); 
+
 			if (_relational_expression(past))
 			{
 				result=true;
@@ -1190,6 +1356,7 @@ boolean 	_relational_expression_aux(AST *past){
 			{
 				token=_lire_token();
 
+*past = creer_noeud_operation('>', *past, NULL, type(*past)); 
 				if (_relational_expression(past))
 				{
 					result=true;
@@ -1203,6 +1370,7 @@ boolean 	_relational_expression_aux(AST *past){
 				if (token==LEQ)
 				{
 					token=_lire_token();
+*past = creer_noeud_operation('l', *past, NULL, type(*past)); 
 
 					if (_relational_expression(past))
 					{
@@ -1216,6 +1384,7 @@ boolean 	_relational_expression_aux(AST *past){
 							if (token==GEQ)
 							{
 								token=_lire_token();
+*past = creer_noeud_operation('g', *past, NULL, type(*past)); 
 
 								if (_relational_expression(past))
 								{
@@ -1242,7 +1411,7 @@ boolean 	_relational_expression_aux(AST *past){
 						 		| eps */
 
 boolean 	_relational_expression_aux_aux(AST *past){
-	boolean result;
+	boolean result=false;
 
 
 
@@ -1262,13 +1431,39 @@ boolean 	_equality_expression(AST *past){
 
 			if (debug) printf ("%s \n ","_equality_expression");
 
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
+
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
 
 		if (_relational_expression(past))
 		{
 			token=_lire_token();
 
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+		
 			if (_equality_expression_aux(past))
-			{
+			{	
+
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) == type(arbre_droit(*past))  ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						
+					}else {
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+						(*past)->typename = Double;
+
+					}
+				}else {(*past) = *past1;} // ??
+
 				result=true;
 			}else{
 				result=false;
@@ -1300,9 +1495,10 @@ boolean 	_equality_expression_aux(AST *past){
 		}else{
 
 			if (token==EQEQ)
-			{
-				token=_lire_token();
+			{	
 
+				token=_lire_token();
+				*past = creer_noeud_operation('e', *past, NULL, type(*past)); 
 				if (_equality_expression(past))
 				{
 					result=true;
@@ -1314,7 +1510,7 @@ boolean 	_equality_expression_aux(AST *past){
 				if (token==NOTEQ)
 				{
 					token=_lire_token();
-
+					*past = creer_noeud_operation('n', *past, NULL, type(*past)); 
 					if (_equality_expression(past))
 					{
 						result=true;
@@ -1343,12 +1539,37 @@ boolean 	_and_expression(AST *past){
 
 		if (debug) printf ("%s \n ","_and_expression");
 
-		if (_equality_expression(past))
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
+
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+		if (_equality_expression(past1))
 		{
 			token=_lire_token();
 
+
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+		
+
 			if (_and_expression_aux(past))
-			{
+			{	
+
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));
+				}else {(*past) = *past1;} // ??
+
 				result=true;
 			}else{
 
@@ -1382,6 +1603,8 @@ boolean 	_and_expression_aux(AST *past){
 			{
 				token=_lire_token();
 
+				*past = creer_noeud_operation('&', *past, NULL, type(*past)); 
+
 				if (_and_expression(past))
 				{
 					result=true;
@@ -1410,12 +1633,38 @@ boolean 	_exclusive_or_expression(AST *past){
 
 		if (debug) printf ("%s \n ","_exclusive_or_expression");
 
-		if (_and_expression(past))
+
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
+
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+
+		if (_and_expression(past1))
 		{
 			token=_lire_token();
 
+
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+		
+
 			if (_exclusive_or_expression_aux(past))
-			{
+			{	
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));
+				}else {(*past) = *past1;} // ??
+
 				result=true;
 			}else{
 
@@ -1447,6 +1696,8 @@ boolean 	_exclusive_or_expression_aux(AST *past){
 			{
 				token=_lire_token();
 
+				*past = creer_noeud_operation('^', *past, NULL, type(*past)); 
+
 				if (_exclusive_or_expression(past))
 				{
 					result=true;
@@ -1476,13 +1727,36 @@ boolean 	_inclusive_or_expression(AST *past){
 
 			if (debug) printf ("%s \n ","_inclusive_or_expression");
 
+			AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
 
-		if (_exclusive_or_expression(past))
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+		if (_exclusive_or_expression(past1))
 		{
 			token=_lire_token();
 
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+			
+
 			if (_inclusive_or_expression_aux(past))
 			{
+
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));;
+				}else {(*past) = *past1;} // ??
+
 				result=true;
 			}else{
 
@@ -1516,6 +1790,8 @@ boolean 	_inclusive_or_expression_aux(AST *past){
 			{
 				token=_lire_token();
 
+				*past = creer_noeud_operation('|', *past, NULL, type(*past)); 
+
 				if (_inclusive_or_expression(past))
 				{
 					result=true;
@@ -1542,12 +1818,37 @@ boolean 	_conditional_and_expression(AST *past){
 	boolean result;
 		if (debug) printf ("%s \n ","_conditional_and_expression");
 
-		if (_inclusive_or_expression(past))
+
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
+
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+		if (_inclusive_or_expression(past1))
 		{
 			token=_lire_token();
 
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
+
+		
 			if (_conditional_and_expression_aux(past))
-			{
+			{	
+
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						(*past)->typename = type(arbre_gauche(*past));
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));
+				}else {(*past) = *past1;} // ??
+
 				result=true;
 			}else{
 
@@ -1577,7 +1878,7 @@ boolean 	_conditional_and_expression_aux(AST *past){
 				if (token==ANDAND)
 				{
 					token=_lire_token();
-
+						*past = creer_noeud_operation('a', *past, NULL, type(*past)); 
 					if (_conditional_and_expression(past))
 					{
 						result=true;
@@ -1748,12 +2049,34 @@ boolean 	_conditional_or_expression(AST *past){
 
 			if (debug) printf ("%s \n ","_conditional_or_expression");
 
+		AST *past1 = (AST *) malloc(sizeof(AST));
+		AST *past2 = (AST *) malloc(sizeof(AST));
 
-		if (_conditional_and_expression(past))
+		(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW 
+
+		if (_conditional_and_expression(past1))
 		{
 			token=_lire_token();
+
+			//if ((*past1) == NULL) printf("PAST1 \n"); // NEW
+		//if ((*past) == NULL) printf("PAST\n"); // NEW
+		if ((*past)->noeud.op.expression_gauche == NULL) (*past) = *past1; // initialisation par le première feuille gauche.
+		else (*past)->noeud.op.expression_droite = *past1; // NEW 3
+		//if (arbre_gauche(*past) == NULL) printf("ag(PAST) 1\n"); // NEW
+		//if (arbre_droit(*past) == NULL) printf("ad(PAST) 1\n"); // NEW
 			if (_conditional_or_expression_aux(past))
-			{
+			{	
+				
+				if ((arbre_droit(*past) != NULL) && (arbre_gauche(*past) != NULL)) {
+					if (type(arbre_gauche(*past)) != Bool || type(arbre_droit(*past)) != Bool ){ // NEW 5 & 6 Int/Int ou Double/Double
+						
+
+						semanticerror = true;
+						creer_sm_erreur_instruction(IncompatibleCompType, tokenattribute.line , "exp");
+
+					}else (*past)->typename = type(arbre_gauche(*past));
+				}else {(*past) = *past1;} // ??
+			
 				result=true;
 			}else{
 
@@ -1788,6 +2111,8 @@ boolean 	_conditional_or_expression_aux(AST *past){
 			if (token==OROR)
 			{
 				token=_lire_token();
+
+				*past = creer_noeud_operation('o', *past, NULL, type(*past));
 
 				if (_conditional_or_expression(past))
 				{
@@ -2139,37 +2464,26 @@ boolean _selection_statement(listinstvalueType ** pplistinstattribute){
 }
 
 
-/*if_statement =
-	'if' '(' boolean_expression ')' embedded_statement
-	 | 'if' '(' boolean_expression ')' embedded_statement 'else' embedded_statement.*/
-
+/*if_statement  = 'if' '(' boolean_expression ')' embedded_statement if_statement_aux
+ */
 boolean _if_statement(listinstvalueType ** pplistinstattribute){
 	boolean result;
 
-	AST *past = (AST *) malloc(sizeof(AST)); // NEW
-	(*past) = (AST) malloc(sizeof(struct Exp));
+	AST *past1 = (AST *) malloc(sizeof(AST));
+	(*past1) = (AST) malloc (sizeof(struct Exp)); // NEW
 
-	listinstvalueType ** pplistif = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
-	listinstvalueType ** pplistelse = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
-	
 	if(token==IF){
 		token=_lire_token();
 		if(token==POPEN){
 			token=_lire_token();
-			if(_boolean_expression(past)){
+			if(_boolean_expression(past1)){
 				token=_lire_token();
 				if(token==PCLOSE){
 					token=_lire_token();
-					if(_embedded_statement(pplistif)){
-						result=true;
+					if(_embedded_statement(pplistinstattribute)){
 						token=_lire_token();
-						if(token==ELSE){
-							token=_lire_token();
-							if(_embedded_statement(pplistelse)){
-								result=true;
-							}else{
-								result=false;
-							}
+						if(_if_statement_aux()){
+							result=true;
 						}else{
 							result=false;
 						}
@@ -2191,6 +2505,23 @@ boolean _if_statement(listinstvalueType ** pplistinstattribute){
 
 	return result;
 }
+
+/*if_statement_aux= 'else' embedded_statement | epsilon*/
+boolean _if_statement_aux(listinstvalueType ** pplistinstattribute){
+	boolean result;
+	if(token==ELSE){
+		token=_lire_token();
+		if(_embedded_statement(pplistinstattribute)){
+		 	result=true;	
+		}else{
+			result=false;
+		}
+	}else{
+		result=true;
+	}
+	return result;
+}
+
 /*switch_statement =
 	'switch' '(' expression ')' switch_block.*/
 
@@ -2351,7 +2682,7 @@ boolean _switch_labels(listinstvalueType ** pplistinstattribute){
 
 boolean _switch_labels_aux(listinstvalueType ** pplistinstattribute){
 	boolean result;
-	if(token==BREAK ){
+	if(token==BREAK || token==BCLOSE || token==CASE || token==DEFAULT){
 		result=true;
 		follow_token=true;
 		
@@ -2407,6 +2738,7 @@ boolean _switch_label(listinstvalueType ** pplistinstattribute){
 	return result;
 }
 /*  **************** Fin Zakaria ********************  */
+	 
 	 
 
 /*   idriss ait hafid ________________________________________________________________*/
@@ -2916,6 +3248,10 @@ boolean _statement_expression_list_aux(listinstvalueType ** pplistinstattribute)
 
 
 
+
+
+
+
 int main(){
 
 	listinstvalueType ** pplistinstattribute = (listinstvalueType **) malloc (sizeof(listinstvalueType *));
@@ -2924,9 +3260,34 @@ int main(){
 	token=_lire_token();
 
 	if(_statement_list(pplistinstattribute)){
-		printf("ok\n");
+		if (debug) ("0 erreurs syntaxiques\n");
+		afficherTS();
+		if (nombre_sm_erreurs() == 0){
+			if (debug) printf("0 erreurs sémantiques\n");
+			if (debug) afficherTS();
+
+			if (debug) { 
+			printf("Affichage du Control Flow Graph produit :\n"); afficher_list_inst(*pplistinstattribute);
+			}
+			if (debug) printf("Generation du code ...\n");			
+			pseudocode pc = generer_pseudo_code(*pplistinstattribute);
+			if (debug) printf("Affichage du pseudocode généré :\n");
+			afficher_pseudo_code(pc);
+			
+		}else{
+			printf("%d erreurs sémantiques\n", nombre_sm_erreurs());
+			afficher_sm_erreurs();
+		}
 	}else{
-		printf("nno\n");
+		printf("plusieurs erreurs syntaxiques\n");
+		/* printf("%d erreurs syntaxiques\n", nombre_sx_erreurs());
+		afficher_sx_erreurs(); */
+		
+		printf("%d erreurs sémantiques\n", nombre_sm_erreurs());
+		if (nombre_sm_erreurs()> 0) afficher_sm_erreurs();
 	}
-}
+
+	
+}			
+			
 

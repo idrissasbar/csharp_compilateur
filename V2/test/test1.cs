@@ -1,2 +1,3 @@
-int i,j;
-double k,j;
+{int i=3.2;
+ double j,k;
+}

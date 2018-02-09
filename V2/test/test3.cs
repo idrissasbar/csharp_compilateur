@@ -1,9 +1,6 @@
-   {
-     int i,k;
-     double i,l;
+public  partial class ForLoopTest 
+{
+    
 
-	for( i=4 ; c<1 ; ){}
-	while(true){
-		int j,k;
-	}
-    }
+
+}
