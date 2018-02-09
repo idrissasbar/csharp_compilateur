@@ -7,7 +7,6 @@
 // auteur Karim Baïna, ENSIAS, Décembre 2010
 
 #define NULL ((void *)0)
-extern boolean debug;
 //typedef enum {false=0, true=1} boolean; //deja defini en AST.h
 
 //typedef enum {Int, Bool} Type; //deja defini en AST.h
@@ -55,19 +54,26 @@ typedef struct INST {
     } assignnode;
     // IF ... THEN 
     struct  {
-      int rangvar; // indice de l'idf à comparer, dans la table des symbole
+      //int rangvar; // indice de l'idf à comparer, dans la table des symbole
       //double right; // la valeur de comparaison
-      AST right; // l'expression à comparer
+      AST astexp; // l'expression à comparer
       struct LIST_INST * thenlinst; // then list of instructions
       struct LIST_INST * elselinst; // else list of instructions
     } ifnode;
-      // for (index:= exp_min..exp_max) loop list_inst end loop;
+      // for (exp;cond;exp) { list_inst  };
     struct {
-      int rangvar; // indice de l'index de la boucle
-      int borneinf; // l'expression borne inf
-      int bornesup; // l'expression borne sup
-      struct LIST_INST * forbodylinst; // for body list of instructions
+      struct LIST_INST * forinitializerlist; // l'expression borne inf
+      AST forcondition; // l'expression borne sup
+      struct LIST_INST * foriteratorlist;//call, assign, decl, decri, incr, new objet
+      struct LIST_INST * forbodylinst;// for body list of instructions
     } fornode;
+      
+    //while( ast ){ list_inst }
+    struct {
+      AST right; // l'expression à comparer
+      struct LIST_INST * whilebodylinst; // while body list of instructions  
+    }whilenode;
+
   } node;
 } instvalueType;
 
@@ -111,4 +117,5 @@ extern pseudocode generer_pseudo_code_list_inst(listinstvalueType * plistinstatt
 
 extern pseudocode generer_pseudo_code(listinstvalueType * plistinstattribute);
 
+#define debug false
 #endif
