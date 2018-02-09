@@ -62,10 +62,10 @@ typedef struct INST {
     } ifnode;
       // for (index:= exp_min..exp_max) loop list_inst end loop;
     struct {
-      int rangvar; // indice de l'index de la boucle
-      int borneinf; // l'expression borne inf
-      int bornesup; // l'expression borne sup
-      struct LIST_INST * forbodylinst; // for body list of instructions
+      struct LIST_INST * forinitializerlist; // l'expression borne inf
+      AST forcondition; // l'expression borne sup
+      struct LIST_INST * foriteratorlist;//call, assign, decl, decri, incr, new objet
+      struct LIST_INST * forbodylinst;// for body list of instructions
     } fornode;
       
     //while( idf ){ list_inst }

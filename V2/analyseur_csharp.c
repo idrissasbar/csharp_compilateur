@@ -2353,7 +2353,7 @@ boolean _switch_labels(listinstvalueType ** pplistinstattribute){
 
 boolean _switch_labels_aux(listinstvalueType ** pplistinstattribute){
 	boolean result;
-	if(token==BREAK ){
+	if(token==BREAK || token==BCLOSE || token==CASE || token==DEFAULT){
 		result=true;
 		follow_token=true;
 		
